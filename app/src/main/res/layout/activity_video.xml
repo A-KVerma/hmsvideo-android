@@ -7,139 +7,191 @@
     android:layout_height="match_parent"
     >
 
-    <GridLayout
+    <FrameLayout
+        xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:columnCount="2"
-        android:rowCount="3">
-
-        <FrameLayout
-            android:layout_width="0dp"
-            android:layout_height="0dp"
-            android:layout_columnWeight="1"
-            android:layout_rowWeight="1">
-
-            <org.webrtc.SurfaceViewRenderer
-                android:id="@+id/surface_view1"
-
-                android:layout_width="match_parent"
-                android:layout_height="match_parent" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:text="1. From camera"
-                android:layout_gravity="top|end"
-                android:textColor="#fff"
-                android:layout_margin="16dp"
-                android:layout_height="wrap_content" />
-        </FrameLayout>
-
-        <FrameLayout
-            android:layout_width="0dp"
-            android:layout_height="0dp"
-
-            android:layout_columnWeight="1"
-            android:layout_rowWeight="1">
-
-            <org.webrtc.SurfaceViewRenderer
-                android:id="@+id/surface_view2"
-                android:visibility="visible"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:text="2. PeerConnection"
-                android:layout_gravity="top|end"
-                android:textColor="#fff"
-                android:layout_margin="16dp"
-                android:layout_height="wrap_content" />
-        </FrameLayout>
-
-        <FrameLayout
-            android:layout_width="0dp"
-            android:layout_height="0dp"
-            android:layout_columnWeight="1"
-            android:layout_rowWeight="1">
-
-            <org.webrtc.SurfaceViewRenderer
-                android:id="@+id/surface_view3"
-                android:visibility="visible"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:text="3. PeerConnection"
-                android:layout_gravity="top|end"
-                android:textColor="#fff"
-                android:layout_margin="16dp"
-                android:layout_height="wrap_content" />
-        </FrameLayout>
-
-        <FrameLayout
-            android:layout_width="0dp"
-            android:layout_height="0dp"
-            android:layout_columnWeight="1"
-            android:layout_rowWeight="1">
-
-            <org.webrtc.SurfaceViewRenderer
-                android:id="@+id/surface_view4"
-                android:visibility="visible"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:text="4. PeerConnection"
-                android:layout_gravity="top|end"
-                android:textColor="#fff"
-                android:layout_margin="16dp"
-                android:layout_height="wrap_content" />
-        </FrameLayout>
-
-        <FrameLayout
-            android:layout_width="0dp"
-            android:layout_height="0dp"
-            android:layout_columnWeight="1"
-            android:layout_rowWeight="1">
-
-            <org.webrtc.SurfaceViewRenderer
-                android:id="@+id/surface_view5"
-                android:visibility="visible"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:text="5. PeerConnection"
-                android:layout_gravity="top|end"
-                android:textColor="#fff"
-                android:layout_margin="16dp"
-                android:layout_height="wrap_content" />
-        </FrameLayout>
-
-        <FrameLayout
-            android:layout_width="0dp"
-            android:layout_height="0dp"
-            android:layout_columnWeight="1"
-            android:layout_rowWeight="1">
-
-            <org.webrtc.SurfaceViewRenderer
-                android:id="@+id/surface_view6"
-                android:visibility="visible"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:text="6. PeerConnection"
-                android:layout_gravity="top|end"
-                android:textColor="#fff"
-                android:layout_margin="16dp"
-                android:layout_height="wrap_content" />
-        </FrameLayout>
+        tools:ignore="MergeRootFrame">
 
 
-    </GridLayout>
+
+        <GridLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:columnCount="2"
+            android:rowCount="3">
+
+            <FrameLayout
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_columnWeight="1"
+                android:layout_rowWeight="1">
+
+                <org.webrtc.SurfaceViewRenderer
+                    android:id="@+id/surface_view1"
+
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:id="@+id/firstpeer_textview"
+                    android:text="1. From camera"
+                    android:layout_gravity="top|end"
+                    android:textColor="#fff"
+                    android:layout_margin="16dp"
+                    android:layout_height="wrap_content" />
+            </FrameLayout>
+
+            <FrameLayout
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+
+                android:layout_columnWeight="1"
+                android:layout_rowWeight="1">
+
+                <org.webrtc.SurfaceViewRenderer
+                    android:id="@+id/surface_view2"
+                    android:visibility="invisible"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent" />
+
+                <TextView
+                    android:id="@+id/secondpeer_textview"
+                    android:layout_width="wrap_content"
+                    android:layout_gravity="top|end"
+                    android:textColor="#fff"
+                    android:layout_margin="16dp"
+                    android:layout_height="wrap_content" />
+            </FrameLayout>
+
+            <FrameLayout
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_columnWeight="1"
+                android:layout_rowWeight="1">
+
+                <org.webrtc.SurfaceViewRenderer
+                    android:id="@+id/surface_view3"
+                    android:visibility="invisible"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent" />
+
+                <TextView
+                    android:id="@+id/thirdpeer_textview"
+                    android:layout_width="wrap_content"
+                    android:layout_gravity="top|end"
+                    android:textColor="#fff"
+                    android:layout_margin="16dp"
+                    android:layout_height="wrap_content" />
+            </FrameLayout>
+
+            <FrameLayout
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_columnWeight="1"
+                android:layout_rowWeight="1">
+
+                <org.webrtc.SurfaceViewRenderer
+                    android:id="@+id/surface_view4"
+                    android:visibility="invisible"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent" />
+
+                <TextView
+                    android:id="@+id/fourthpeer_textview"
+                    android:layout_width="wrap_content"
+                    android:layout_gravity="top|end"
+                    android:textColor="#fff"
+                    android:layout_margin="16dp"
+                    android:layout_height="wrap_content" />
+            </FrameLayout>
+
+            <FrameLayout
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_columnWeight="1"
+                android:layout_rowWeight="1">
+
+                <org.webrtc.SurfaceViewRenderer
+                    android:id="@+id/surface_view5"
+                    android:visibility="invisible"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent" />
+
+                <TextView
+                    android:id="@+id/fifthpeer_textview"
+                    android:layout_width="wrap_content"
+                    android:layout_gravity="top|end"
+                    android:textColor="#fff"
+                    android:layout_margin="16dp"
+                    android:layout_height="wrap_content" />
+            </FrameLayout>
+
+            <FrameLayout
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_columnWeight="1"
+                android:layout_rowWeight="1">
+
+                <org.webrtc.SurfaceViewRenderer
+                    android:id="@+id/surface_view6"
+                    android:visibility="invisible"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent" />
+
+                <TextView
+                    android:id="@+id/sixthpeer_textview"
+                    android:layout_width="wrap_content"
+                    android:layout_gravity="top|end"
+                    android:textColor="#fff"
+                    android:layout_margin="16dp"
+                    android:layout_height="wrap_content" />
+            </FrameLayout>
+
+
+        </GridLayout>
+
+        <LinearLayout
+            android:id="@+id/buttons_call_container"
+            android:orientation="horizontal"
+            android:layout_gravity="center|bottom"
+            android:layout_marginTop="32dp"
+            android:layout_marginBottom="32dp"
+            android:paddingLeft="10dp"
+            android:layout_centerHorizontal="true"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="#aaaaaa">
+
+            <ImageButton
+                android:id="@+id/button_call_disconnect"
+                android:background="@android:drawable/ic_delete"
+                android:contentDescription="@string/disconnect_call"
+                android:layout_marginEnd="16dp"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:layout_marginRight="16dp" />
+
+            <ImageButton
+                android:id="@+id/button_call_switch_camera"
+                android:background="@android:drawable/ic_menu_camera"
+                android:contentDescription="@string/switch_camera"
+                android:layout_marginEnd="8dp"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:layout_marginRight="8dp" />
+
+            <ImageButton
+                android:id="@+id/button_call_toggle_mic"
+                android:background="@android:drawable/ic_btn_speak_now"
+                android:contentDescription="@string/toggle_mic"
+                android:layout_marginEnd="8dp"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:layout_marginRight="8dp" />
+
+        </LinearLayout>
+    </FrameLayout>
+
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
