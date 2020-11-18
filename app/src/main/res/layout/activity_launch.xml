@@ -38,7 +38,7 @@
         android:layout_height="wrap_content"
         android:ems="10"
         android:inputType="textPersonName"
-        android:text="water"
+        android:text="androidtest"
         android:hint="Room name" />
 
     <TextView
