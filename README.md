@@ -2,14 +2,6 @@
 
 Here you will find everything you need to build experiences with video using 100ms Android SDK. Dive into our SDKs, quick starts, add real-time video, voice, and screen sharing to your web and mobile applications.
 
-## Quick start to run the sample application
-
-```bash
-git clone https://github.com/100mslive/hmsvideo-android.git
-gradlew assembleDebug (or Run it from Android Studio)
-```
-![Git Pull](img/git.png?raw=true "Git Pull")
-
 ## Pre requisites
 
 - Android Studio 2.0 or higher
@@ -21,9 +13,72 @@ gradlew assembleDebug (or Run it from Android Studio)
 
 The Android SDK supports Android API level 21 and higher. It is built for armeabi-v7a, arm64-v8a, x86, and x86_64 architectures.
 
-## To run the sample application
+
+## Quick start to run the sample application
+
+```bash
+git clone https://github.com/100mslive/hmsvideo-android.git
+gradlew assembleDebug (or Run it from Android Studio)
+```
+![Git Pull](img/git.png?raw=true "Git Pull")
+
+
+## Install SDK & NDK
 
 The sample application should run without any issues after you have the latest SDK and NDK. You don't need to add any other additional steps. 
+
+The sample app uses build tool version 30. 
+
+![SDK version](img/sdkmanager.png?raw=true "SDK Version")
+
+The sample app uses NDK. You can download from the `SDK Tools` tab from your SDK manager. 
+
+![NDK version](img/ndk.png?raw=true "NDK Version")
+
+Once you have both SDK and NDK, you can just run the application. Incase if the app prompts you to select the proper NDK version, follow the below steps. 
+
+Open the `Project Structure` from the `File` menu. (File → Project Structure)
+
+![NDK location](img/projectstr.png?raw=true "NDK location")
+
+And select the NDK path where you have your NDK version downloaded. By default, it will be inside your SDK directory path.
+
+![NDK path](img/ndkselect.png?raw=true "NDK path")
+
+# Run the application using an Emulator
+
+Using an Emulator This guide will walk you through setting up and emulator that is compatible with the 100ms Video SDK.
+
+![Create VD](img/createvd.png?raw=true "Create VD")
+
+Pick the Virtual device that you would like to create.
+
+![Pick VD](img/vdsize.png?raw=true "Pick VD")
+
+Pick a system image for the virtual device. The sample app uses `API version 30`.
+
+![System image](img/systemimage.png?raw=true "System image")
+
+Now, we are good to go to run the application. 
+
+Once we are good to go with the emulator, `Run` the application from Android Studio.
+
+![run](img/runapp.png?raw=true "run app")
+
+In the launch screen, here we need to mention three inputs. 
+```
+1. Endpoint URL 
+2. Room Name
+3. User Name
+```
+And then click `Connect`.
+
+On the first time of launch, user will be prompted with permissions. Then you are good to go to run the application. To verify quickly, connect from a browser on the same end point URL with `https` prefix and join the room. (wss://conf.brytecam.com/ws -> https://conf.brytecam.com)
+
+Start the video conversation!
+
+![app](img/app.png?raw=true "app")
+
 
 ## To add it on your existing project
 
