@@ -134,7 +134,7 @@ hmsClient.join(roomid, new RequestHandler()
 {
 	@Override
 	public void onSuccess(String data) {
-    //data returns roomid
+    		//data returns roomid
 		Log.v("HMSClient onJoinSuccess", data);
 	}
 	@Override
@@ -153,11 +153,11 @@ After joining, immediately add listeners to listen to peers joining, new streams
 ```java
 HMSEventListener listener = new HMSEventListener()
 {
-		@Override
+    @Override
     public void onConnect() {
        //When the peer connects to the room
     }
-		@Override
+    @Override
     public void onDisconnect() {
       //when the peer disconnected from the room   
     }
@@ -200,6 +200,7 @@ video.put("framerate", 25);
 video.put("codec", "vp8");
 video.put("bitrate", "128");
 video.put("facingMode", "user");
+//video.put("facingMode", "environment"); -- for rear camera
 
 Map<String, Object> audio = new HashMap<>();
 if(audioEnabled)
@@ -214,9 +215,10 @@ HMSStream.getUserMedia(this, localMediaConstraints, new HMSStream.GetUserMediaLi
     @Override
     public void onSuccess(HMSRTCMediaStream mediaStream) {				//Receive the local media stream
      
-				 localStream = mediaStream;
-				//Expose Media stream APIs to developers
-				// process the stream
+			 localStream = mediaStream;
+			 //Expose Media stream APIs to developers
+			 // process the stream
+			 //And example has been given below
     }
 
     @Override
@@ -364,7 +366,6 @@ hmsClient.disconnect();
 ```
 
 
-
 ## To add it on your existing project
 
 All the following libraries in your app level gradle file as dependencies. Incase if you are using any of the following libraries already in your application, use the same version as it is. Make sure `okhttp` and `webrtc` uses the same version as mentioned. 
@@ -401,4 +402,8 @@ There are two library files that needs to be imported from the "libs" folder of 
 
 Now do the same steps for brytecam-lib-1.0.3 lib as well
 ```
+
+Once you have added dependency libraries, you can run the application. Incase if you face any issues, reach out to us.
+
+
 
