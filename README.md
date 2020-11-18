@@ -79,6 +79,291 @@ Start the video conversation!
 
 ![app](img/app.png?raw=true "app")
 
+# Quick start into 100ms basics
+
+## Core building block concepts
+
+---
+
+- **Room** - A room represents a real-time audio, data, video and/or screenshare session, the basic building block of the Brytecam Video SDK
+- **Stream** - A stream represents real-time audio, video and data media streams that are shared to a room
+- **Peer/Participant** - A peer represents all participants connected to a room (other than the local participant)
+- **Publish** - A local participant can share its audio, video and data tracks by "publishing" its tracks to the room
+- **Subscribe** - A local participant can stream any peer's audio, video and data tracks by "subscribing" to their tracks
+- **Broadcast** - A local participant can send any message/data to all peers in the room
+
+## Create and instantiate HMSClient (100ms Client)
+
+---
+
+This will instantiate an `HMSClient` object
+
+```java
+//Create a 100ms peer
+hmspeer = new HMSPeer(username, authToken);
+//Create a room
+hmsRoom = new HMSRoom(roomname);
+
+//Create client configuration
+config = new HMSClientConfig(servername);
+
+//Create a 100ms client
+hmsClient = new HMSClient(this, getApplicationContext(), hmspeer, config);
+
+hmsClient.setLogLevel(HMSLogger.LogLevel.LOG_DEBUG);
+```
+
+## Connect
+
+---
+
+After instantiating `HMSClient`, connect to 100ms' server
+
+```java
+//The client will connect to the WebSocket channel provided through the config
+hmsClient.connect();
+```
+
+## Join a room
+
+---
+
+```java
+//Pass the unique id for the room here as a String
+hmsClient.join(roomid, new RequestHandler()
+{
+	@Override
+	public void onSuccess(String data) {
+    //data returns roomid
+		Log.v("HMSClient onJoinSuccess", data);
+	}
+	@Override
+	public void onFailure(long error, String errorReason) {
+		Log.v("HMSClient onJoinFailure", errorReason);
+	}
+});
+```
+
+## Setup listeners
+
+---
+
+After joining, immediately add listeners to listen to peers joining, new streams being added to the room
+
+```java
+HMSEventListener listener = new HMSEventListener()
+{
+		@Override
+    public void onConnect() {
+       //When the peer connects to the room
+    }
+		@Override
+    public void onDisconnect() {
+      //when the peer disconnected from the room   
+    }
+    @Override
+    public void onPeerJoin(HMSPeer peer) {
+			//call actions related to a new peer addition 
+    }
+    @Override
+    public void onPeerLeave(HMSPeer peer) {
+			//call actions related to a peer removal   
+    }
+    @Override
+    public void onStreamAdd(HMSPeer peer, HMSStreamInfo mediaInfo) {
+			//call actions related to a stream addtion
+			//call subscribe    
+    }
+    @Override
+    public void onStreamRemove(HMSPeer peer, HMSStreamInfo mediaInfo) {
+			//call actions related to a stream removal
+			//call unsubscribe    
+    }
+    @Override
+    public void onBroadcast(HMSPayload payload) {
+			//call actions related to a broadcast
+    }
+};
+```
+
+## Create and Get local camera/mic streams
+
+---
+
+```java
+//You can set codec, bitrate, framerate, etc here.
+Map<String, Object> video = new HashMap<>();
+video.put("resolution", "qvga");
+video.put("width", 320);
+video.put("height", 240);
+video.put("framerate", 25);
+video.put("codec", "vp8");
+video.put("bitrate", "128");
+video.put("facingMode", "user");
+
+Map<String, Object> audio = new HashMap<>();
+if(audioEnabled)
+    audio.put("volume", Double.valueOf("100.0"));
+else
+    audio.put("volume", Double.valueOf("0.0"));
+
+localMediaConstraints = new HMSRTCMediaStreamConstraints(audio, video);
+
+HMSStream.getUserMedia(this, localMediaConstraints, new HMSStream.GetUserMediaListener() {
+
+    @Override
+    public void onSuccess(HMSRTCMediaStream mediaStream) {				//Receive the local media stream
+     
+				 localStream = mediaStream;
+				//Expose Media stream APIs to developers
+				// process the stream
+    }
+
+    @Override
+    public void onFailure(String errorReason) {
+			Log.v("HMSClient onLeaveFailure", errorReason);
+    }
+});
+```
+
+Please use the following settings for video that looks good in postcard-sized videos - codec:`VP8`, bitrate `256`, framerate `25`. We will extend this in the future to add more options including front/back camera
+
+## Display local stream
+
+---
+
+Once `mediaStream` has been received, get the video and audio tracks from the stream object.
+
+Call the `VideoTrack` `addsink` method with `SurfaceviewRenderer`.
+
+```java
+//The following code is a sample. Developers can make use of the stream object 
+//in their own way of rendering
+if(mediaStream.getStream().videoTracks.size()>0) {
+    localVideoTrack = mediaStream.getStream().videoTracks.get(0);
+    localVideoTrack.setEnabled(true);
+}
+if(mediaStream.getStream().audioTracks.size()>0) {
+    localAudioTrack = mediaStream.getStream().audioTracks.get(0);
+    localAudioTrack.setEnabled(true);
+}
+
+runOnUiThread(() -> {
+    try {
+        firstSVrenderer.setVisibility(View.VISIBLE);
+        localVideoTrack.addSink(firstSVrenderer);
+    } catch (Exception e) {
+        e.printStackTrace();
+    }
+});
+```
+
+## Publish
+
+---
+
+A local participant can share her audio, video and data tracks by "publishing" its tracks to the room
+
+```java
+hmsClient.publish(stream, room, new RequestHandler()
+{
+	@Override
+	public void onSuccess(String data) {
+		Log.v("HMSClient onPublishSuccess", data);
+	}
+	@Override
+	public void onFailure(long error, String errorReason) {
+		Log.v("HMSClient onPublishFailure", errorReason);
+	}
+});
+```
+
+## Subscribe
+
+---
+
+This method "subscribes" to a peer's stream. This should ideally be called in the `onStreamAdd` listener
+
+```java
+hmsClient.subscribe(streamInfo, new RequestHandler()
+{
+	@Override
+	public void onSuccess(String data) {
+		Log.v("HMSClient onSubscribeSuccess", data);
+	}
+	@Override
+	public void onFailure(long error, String errorReason) {
+		Log.v("HMSClient onSubscribeFailure", errorReason);
+	}
+});
+```
+
+## Broadcast
+
+---
+
+This method broadcasts a payload to all participants
+
+```java
+hmsClient.broadcast(payload, room, new RequestHandler()
+{
+	@Override
+	public void onSuccess(String data) {
+		Log.v("HMSClient onBroadcastSuccess", data);
+	}
+	@Override
+	public void onFailure(long error, String errorReason) {
+		Log.v("HMSClient onBroadcastFailure", errorReason);
+	}
+});
+```
+
+## Unpublish local stream
+
+---
+
+```java
+hmsClient.unpublish(stream, new RequestHandler()
+{
+	@Override
+	public void onSuccess(String data) {
+		Log.v("HMSClient onPublishSuccess", data);
+	}
+	@Override
+	public void onFailure(long error, String errorReason) {
+		Log.v("HMSClient onPublishFailure", errorReason);
+	}
+});
+```
+
+## Unsubscribe to a peer's stream
+
+---
+
+```java
+hmsClient.unsubscribe(stream, new RequestHandler()
+{
+	@Override
+	public void onSuccess(String data) {
+		Log.v("HMSClient onUnSubscribeSuccess", data);
+	}
+	@Override
+	public void onFailure(long error, String errorReason) {
+		Log.v("HMSClient onUnSubscribeFailure", errorReason);
+	}
+});
+```
+
+## Disconnect client
+
+---
+
+```java
+//The client will disconnect from the WebSocket channel provided
+hmsClient.disconnect();
+```
+
+
 
 ## To add it on your existing project
 
