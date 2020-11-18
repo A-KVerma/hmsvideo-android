@@ -8,6 +8,7 @@ Here you will find everything you need to build experiences with video using 100
 git clone https://github.com/100mslive/hmsvideo-android.git
 gradlew assembleDebug (or Run it from Android Studio)
 ```
+![Git Pull](img/git.png?raw=true "Git Pull")
 
 ## Pre requisites
 
