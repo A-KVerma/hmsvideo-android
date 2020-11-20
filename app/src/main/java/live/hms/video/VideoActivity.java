@@ -6,11 +6,13 @@ import androidx.appcompat.widget.Toolbar;
 
 import android.Manifest;
 import android.content.Context;
+import android.content.Intent;
 import android.media.AudioManager;
 import android.os.Bundle;
 import android.util.ArrayMap;
 import android.util.Log;
 import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
@@ -75,9 +77,6 @@ public class VideoActivity extends AppCompatActivity implements HMSEventListener
     VideoTrack sixthSVVideoTrack= null;
     AudioTrack sixthSVAudioTrack = null;
     boolean isCameraToggled = false;
-
-
-
     boolean isAudioEnabled = true;
     boolean isFrontCameraEnabled = true;
     Boolean[] isCellFreeHolder = {true, true, true, true, true, true};
@@ -123,6 +122,9 @@ public class VideoActivity extends AppCompatActivity implements HMSEventListener
         EasyPermissions.onRequestPermissionsResult(requestCode, permissions, grantResults, this);
     }
 
+
+
+
     @AfterPermissionGranted(RC_CALL)
     void start()
     {
@@ -133,7 +135,7 @@ public class VideoActivity extends AppCompatActivity implements HMSEventListener
             initToggleMenu();
             getUserMedia(isFrontCameraEnabled, isAudioEnabled, isCameraToggled);
         } else {
-            EasyPermissions.requestPermissions(this, "Need some permissions", RC_CALL, perms);
+            EasyPermissions.requestPermissions(this, "Need User permissions to proceed", RC_CALL, perms);
         }
 
     }
@@ -147,7 +149,7 @@ public class VideoActivity extends AppCompatActivity implements HMSEventListener
         hmsRoom = new HMSRoom(roomname);
 
         //For debugging purpose. Remove it later
-        if(env.equals("conf"))
+        if (env.equals("conf"))
             peer.setRoomId(hmsRoom.getRoomId());
 
         //Create client configuration
@@ -164,14 +166,6 @@ public class VideoActivity extends AppCompatActivity implements HMSEventListener
     void initToggleMenu()
     {
 
-        //Setting mode to communication to avoid echo
-        AudioManager manager = (AudioManager) this.getSystemService(Context.AUDIO_SERVICE);
-        if (manager != null) {
-            isAudioEnabled = true;
-            manager.setMicrophoneMute(false);
-            manager.setMode(AudioManager.MODE_IN_COMMUNICATION);
-            manager.setSpeakerphoneOn(true);
-        }
 
         disconnectButton = findViewById(R.id.button_call_disconnect);
         cameraSwitchButton = findViewById(R.id.button_call_switch_camera);
@@ -200,10 +194,8 @@ public class VideoActivity extends AppCompatActivity implements HMSEventListener
 
         toggleMuteButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View view) {
-
                 toggleMic();
                 toggleMuteButton.setAlpha(isAudioEnabled ? 1.0f : 0.3f);
-                // getUserMedia(true, isAudioEnabled);
             }
         });
 
@@ -211,22 +203,22 @@ public class VideoActivity extends AppCompatActivity implements HMSEventListener
 
 
     public boolean toggleMic() {
-        AudioManager manager = (AudioManager) this.getSystemService(Context.AUDIO_SERVICE);
 
-        if (manager != null) {
-            if (manager.isMicrophoneMute()) {
-                isAudioEnabled = true;
-                manager.setMicrophoneMute(false);
-                manager.setMode(AudioManager.MODE_IN_COMMUNICATION);
-                manager.setSpeakerphoneOn(true);
-            } else {
+        if(localAudioTrack!=null)
+        {
+            if(localAudioTrack.enabled())
+            {
                 isAudioEnabled = false;
-                //manager.setMode(AudioManager.RINGER_MODE_SILENT);
-                //manager.setRingerMode(0);
-                manager.setMicrophoneMute(true);
-                //manager.setSpeakerphoneOn(false);
+                localAudioTrack.setEnabled(false);
+            }
+            else
+            {
+                isAudioEnabled = true;
+                localAudioTrack.setEnabled(true);
             }
         }
+
+
         return isAudioEnabled;
     }
 
@@ -360,8 +352,6 @@ public class VideoActivity extends AppCompatActivity implements HMSEventListener
 
                 localMediaStream = mediaStream;
 
-
-
                 if(firstSVrenderer ==null)
                 {
                     firstSVrenderer.init(HMSWebRTCEglUtils.getRootEglBaseContext(), null);
@@ -379,6 +369,7 @@ public class VideoActivity extends AppCompatActivity implements HMSEventListener
                     localAudioTrack = mediaStream.getStream().audioTracks.get(0);
                     localAudioTrack.setEnabled(true);
                 }
+
 
                 runOnUiThread(() -> {
                     try {
@@ -435,6 +426,9 @@ public class VideoActivity extends AppCompatActivity implements HMSEventListener
 
     public void disconnect()
     {
+        localVideoTrack = null;
+        localAudioTrack = null;
+        localMediaStream = null;
 
         if(firstSVrenderer!=null) {
             firstSVrenderer.release();
@@ -522,13 +516,6 @@ public class VideoActivity extends AppCompatActivity implements HMSEventListener
                     }
                 });
 
-                runOnUiThread(() -> {
-                    try {
-                    } catch (Exception e) {
-                        Log.v(TAG, "Second Sv rendered "+e.getMessage());
-                        e.printStackTrace();
-                    }
-                });
                 break;
             case 2:
                 if(data.videoTracks.size()>0) {
@@ -561,12 +548,6 @@ public class VideoActivity extends AppCompatActivity implements HMSEventListener
                     }
                 });
 
-                runOnUiThread(() -> {
-                    try {
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                });
                 break;
             case 3:
 
@@ -600,14 +581,6 @@ public class VideoActivity extends AppCompatActivity implements HMSEventListener
                     }
                 });
 
-
-                runOnUiThread(() -> {
-                    try {
-
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                });
                 break;
             case 4:
 
@@ -640,13 +613,7 @@ public class VideoActivity extends AppCompatActivity implements HMSEventListener
 
                     }
                 });
-                runOnUiThread(() -> {
-                    try {
 
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                });
                 break;
             case 5:
 
@@ -678,13 +645,7 @@ public class VideoActivity extends AppCompatActivity implements HMSEventListener
                                   }
                               }
                 );
-                runOnUiThread(() -> {
-                    try {
 
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                });
                 break;
             default:
                 break;
@@ -884,7 +845,8 @@ public class VideoActivity extends AppCompatActivity implements HMSEventListener
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                secondSVrenderer.setVisibility(View.INVISIBLE);
+                                if(secondSVrenderer!=null)
+                                    secondSVrenderer.setVisibility(View.INVISIBLE);
                             }
                         });
 
@@ -899,7 +861,8 @@ public class VideoActivity extends AppCompatActivity implements HMSEventListener
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                thirdSVrenderer.setVisibility(View.INVISIBLE);
+                                if(thirdSVrenderer!=null)
+                                    thirdSVrenderer.setVisibility(View.INVISIBLE);
                             }
                         });
 
@@ -913,7 +876,8 @@ public class VideoActivity extends AppCompatActivity implements HMSEventListener
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                fourthSVrenderer.setVisibility(View.INVISIBLE);
+                                if(fourthSVrenderer!=null)
+                                    fourthSVrenderer.setVisibility(View.INVISIBLE);
                             }
                         });
 
@@ -926,27 +890,29 @@ public class VideoActivity extends AppCompatActivity implements HMSEventListener
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                fifthSVrenderer.setVisibility(View.INVISIBLE);
+                                if(fifthSVrenderer!=null)
+                                    fifthSVrenderer.setVisibility(View.INVISIBLE);
                             }
                         });
 
-                        //fifthSVrenderer.setVisibility(View.INVISIBLE);
+
                         fifthSVrenderer.clearImage();
                         fifthSVrenderer.clearAnimation();
-                        //fifthSVrenderer = null;
+
                         break;
                     case 5:
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                sixthSVrenderer.setVisibility(View.INVISIBLE);
+                                if(sixthSVrenderer!=null)
+                                    sixthSVrenderer.setVisibility(View.INVISIBLE);
                             }
                         });
 
-                        //sixthSVrenderer.setVisibility(View.INVISIBLE);
+
                         sixthSVrenderer.clearImage();
                         sixthSVrenderer.clearAnimation();
-                        //sixthSVrenderer = null;
+
                         break;
                     default:
                         break;

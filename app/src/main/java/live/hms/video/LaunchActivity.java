@@ -8,11 +8,15 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.StrictMode;
+import android.provider.MediaStore;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 
+import com.brytecam.lib.HMSClient;
+import com.brytecam.lib.HMSClientConfig;
+import com.brytecam.lib.HMSPeer;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -24,14 +28,16 @@ import okhttp3.RequestBody;
 import okhttp3.Response;
 
 /**
- * Created by Karthikeyan NG on 14.09.2020.
- * Copyright © Brytecam. All rights reserved.
+ * Created by Karthikeyan NG
+ * Copyright © 100ms.live. All rights reserved.
  * Initial login screen with user details
  */
 public class LaunchActivity extends AppCompatActivity {
     private Button connectButton;
     private EditText roomIdEditText, userIdEditText, serverEditText;
     private String token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhY2Nlc3Nfa2V5IjoiNWY5ZWRjNmJkMjM4MjE1YWVjNzcwMGUyIiwiYXBwX2lkIjoiNWY5ZWRjNmJkMjM4MjE1YWVjNzcwMGUxIiwicm9vbV9pZCI6ImFuZHJvaWQiLCJwZWVyX2lkIjoiSm9obkRvZSIsImlhdCI6MTYwNDYzOTY2OSwiZXhwIjoxNjA0NzI2MDY5LCJpc3MiOiI1ZjllZGM2YmQyMzgyMTVhZWM3NzAwZGYiLCJqdGkiOiIyZDQyODgzYi05NjM0LTRjYzEtOTc5ZC04Zjc4MGVjMGZlMmEifQ.DG-aSav45Kt4DONn6617qPuPx9TMwsyvGjx_QPbwS04";
+    private String newToken ="";
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,14 +59,14 @@ public class LaunchActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
 
-
+                newToken = getNewToken();
                 showWorkingDialog();
 
                 new Handler().postDelayed(new Runnable() {
 
                     @Override
                     public void run() {
-                        //String newToken = getNewToken();
+
                         if(serverEditText.getText().toString().contains("conf.brytecam"))
                         {
                             Intent callIntent = new Intent(LaunchActivity.this, VideoActivity.class);
@@ -75,7 +81,7 @@ public class LaunchActivity extends AppCompatActivity {
                         }
                         else
                         {
-                            // token = newToken;
+                            token = newToken;
                             Intent callIntent = new Intent(LaunchActivity.this, VideoActivity.class);
                             callIntent.putExtra("server", serverEditText.getText().toString());
                             callIntent.putExtra("room", roomIdEditText.getText().toString());
@@ -89,7 +95,7 @@ public class LaunchActivity extends AppCompatActivity {
 
                     }
 
-                }, 100);
+                }, 5000);
 
             }
         });
@@ -107,7 +113,7 @@ public class LaunchActivity extends AppCompatActivity {
         } catch (JSONException e) {
             e.printStackTrace();
         }
-        Log.v("jsonstr", jsonObject.toString());
+        Log.v("HMSClient", jsonObject.toString());
 
         OkHttpClient client = new OkHttpClient();
         MediaType JSON = MediaType.parse("application/json; charset=utf-8");
@@ -125,10 +131,10 @@ public class LaunchActivity extends AppCompatActivity {
         try {
             response = client.newCall(request).execute();
             resStr = response.body().string();
-            Log.v("token ", resStr);
+            Log.v("HMSClient", "token: "+resStr);
 
             jsonObj = new JSONObject(resStr);
-            Log.v("token", jsonObj.getString("token"));
+            //Log.v("token", jsonObj.getString("token"));
             val= jsonObj.getString("token");
         } catch (Exception e) {
             e.printStackTrace();
