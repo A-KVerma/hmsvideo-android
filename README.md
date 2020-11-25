@@ -235,7 +235,8 @@ hmsClient.getUserMedia(this, localMediaConstraints, new HMSStream.GetUserMediaLi
     public void onFailure(String errorReason) {
 			Log.v("HMSClient onLeaveFailure", errorReason);
     }
-});```
+});
+```
 
 Please use the following settings for video that looks good in postcard-sized videos - codec:`VP8`, bitrate `256`, framerate `25`. We will extend this in the future to add more options including front/back camera
 
