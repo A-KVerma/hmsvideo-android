@@ -1,0 +1,53 @@
+<PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <PreferenceCategory app:title="@string/video_settings">
+
+        <SwitchPreferenceCompat
+            app:key="publish_video"
+            app:defaultValue="true"
+            app:title="@string/video_publish" />
+
+        <ListPreference
+            app:defaultValue="VGA (640 x 480)"
+            app:entries="@array/videoResolutions"
+            app:entryValues="@array/videoResolutionsValues"
+            app:key="resolution"
+            app:title="@string/video_resolution"
+            app:useSimpleSummaryProvider="true" />
+
+        <ListPreference
+            app:defaultValue="VP8"
+            app:entries="@array/videoCodecs"
+            app:entryValues="@array/videoCodecs"
+            app:key="codec"
+            app:title="@string/video_codec"
+            app:useSimpleSummaryProvider="true" />
+
+        <!--        <EditTextPreference-->
+        <!--            app:key="video_bitrate"-->
+        <!--            app:title="@string/video_maxbitrate"-->
+        <!--            app:useSimpleSummaryProvider="true" />-->
+
+        <EditTextPreference
+            app:key="video_framerate"
+            app:defaultValue="30"
+            app:title="@string/video_frame_rate"
+            app:useSimpleSummaryProvider="true" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory app:title="@string/audio_settings">
+
+        <SwitchPreferenceCompat
+            app:key="publish_audio"
+            app:defaultValue="true"
+            app:title="@string/audio_publish" />
+
+        <!--        <EditTextPreference-->
+        <!--            app:key="audio_bitrate"-->
+        <!--            app:title="@string/audio_maxbitrate"-->
+        <!--            app:useSimpleSummaryProvider="true" />-->
+
+    </PreferenceCategory>
+
+</PreferenceScreen>

@@ -30,9 +30,8 @@ dependencies {
     implementation fileTree(dir: "libs", include: ["*.jar", "*.aar"])
     implementation 'androidx.appcompat:appcompat:1.2.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.0.4'
-
     implementation project(':brytecam-lib-1.0.3')
-    implementation project(':brytecam-sdk-0.8.6')
+    implementation project(':brytecam-sdk-0.9.0')
     implementation 'org.webrtc:google-webrtc:1.0.32006'
     implementation 'com.android.support:support-annotations:28.0.0'
     implementation 'com.squareup.okhttp3:okhttp:3.6.0'
@@ -44,7 +43,7 @@ dependencies {
     implementation 'org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.2.61'
     implementation "org.jetbrains.kotlin:kotlin-reflect:1.3.10"
     implementation 'com.alibaba:fastjson:1.1.70.android'
-
+    implementation 'androidx.preference:preference:1.1.1'
 
 
     //testImplementation 'junit:junit:4.12'

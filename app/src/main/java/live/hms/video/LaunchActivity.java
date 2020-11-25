@@ -10,9 +10,14 @@ import android.os.Handler;
 import android.os.StrictMode;
 import android.provider.MediaStore;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Toast;
+
 
 import com.brytecam.lib.HMSClient;
 import com.brytecam.lib.HMSClientConfig;
@@ -59,49 +64,49 @@ public class LaunchActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
 
-                newToken = getNewToken();
-                showWorkingDialog();
+                if(serverEditText.getText().toString().contains("conf.brytecam"))
+                {
+                    Intent callIntent = new Intent(LaunchActivity.this, VideoActivity.class);
+                    callIntent.putExtra("server", serverEditText.getText().toString());
+                    callIntent.putExtra("room", roomIdEditText.getText().toString());
+                    callIntent.putExtra("user", userIdEditText.getText().toString().length()==0?"JohnDoe":userIdEditText.getText().toString());
+                    callIntent.putExtra("auth_token", token);
+                    callIntent.putExtra("env", "conf");
+                    callIntent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+                    startActivity(callIntent);
 
-                new Handler().postDelayed(new Runnable() {
+                }
+                else {
+                    //Use the get new token method below and modify based on your case
+                    showWorkingDialog();
+                    getNewToken();
 
-                    @Override
-                    public void run() {
-
-                        if(serverEditText.getText().toString().contains("conf.brytecam"))
-                        {
-                            Intent callIntent = new Intent(LaunchActivity.this, VideoActivity.class);
-                            callIntent.putExtra("server", serverEditText.getText().toString());
-                            callIntent.putExtra("room", roomIdEditText.getText().toString());
-                            callIntent.putExtra("user", userIdEditText.getText().toString().length()==0?"JohnDoe":userIdEditText.getText().toString());
-                            callIntent.putExtra("auth_token", token);
-                            callIntent.putExtra("env", "conf");
-                            callIntent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
-                            startActivity(callIntent);
-
-                        }
-                        else
-                        {
-                            token = newToken;
-                            Intent callIntent = new Intent(LaunchActivity.this, VideoActivity.class);
-                            callIntent.putExtra("server", serverEditText.getText().toString());
-                            callIntent.putExtra("room", roomIdEditText.getText().toString());
-                            callIntent.putExtra("user", userIdEditText.getText().toString().length()==0?"JohnDoe":userIdEditText.getText().toString());
-                            callIntent.putExtra("auth_token", token);
-                            callIntent.putExtra("env", "others");
-                            callIntent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
-                            startActivity(callIntent);
-                        }
-                        removeWorkingDialog();
-
-                    }
-
-                }, 5000);
-
+                }
             }
         });
     }
 
-    String getNewToken()
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.menu_bryte, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == R.id.action_settings) {
+            //Do your stuff here
+            Intent callIntent = new Intent(LaunchActivity.this, SettingsActivity.class);
+            startActivity(callIntent);
+
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+
+    void getNewToken()
     {
         String resStr = "";
         // create your json here
@@ -136,10 +141,26 @@ public class LaunchActivity extends AppCompatActivity {
             jsonObj = new JSONObject(resStr);
             //Log.v("token", jsonObj.getString("token"));
             val= jsonObj.getString("token");
+
+            removeWorkingDialog();
+
+            Intent callIntent = new Intent(LaunchActivity.this, VideoActivity.class);
+            callIntent.putExtra("server", serverEditText.getText().toString());
+            callIntent.putExtra("room", roomIdEditText.getText().toString());
+            callIntent.putExtra("user", userIdEditText.getText().toString().length() == 0 ? "JohnDoe" : userIdEditText.getText().toString());
+            callIntent.putExtra("auth_token", val);
+            callIntent.putExtra("env", "others");
+            callIntent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+            startActivity(callIntent);
+
+
+
         } catch (Exception e) {
+            removeWorkingDialog();
+            Toast.makeText(getApplicationContext(), "Error in receiving token", Toast.LENGTH_LONG).show();
             e.printStackTrace();
         }
-        return val;
+        // return val;
     }
 
 
