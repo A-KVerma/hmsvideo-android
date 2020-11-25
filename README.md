@@ -18,7 +18,6 @@ The Android SDK supports Android API level 21 and higher. It is built for armeab
 
 ```bash
 git clone https://github.com/100mslive/hmsvideo-android.git
-gradlew assembleDebug (or Run it from Android Studio)
 ```
 ![Git Pull](img/git.png?raw=true "Git Pull")
 
@@ -176,6 +175,22 @@ HMSEventListener listener = new HMSEventListener()
 			//call actions related to a broadcast
     }
 };
+```
+
+## Mute/unmute local video/audio
+
+Get the local audio/video tracks from **HMSStream.getUserMedia()** method.
+
+---
+
+```java
+// To mute a local video track
+localVideoTrack = mediaStream.getStream().videoTracks.get(0);
+localVideoTrack.setEnabled(false);
+
+// To mute a local audio track
+localAudioTrack = mediaStream.getStream().audioTracks.get(0);
+localAudioTrack.setEnabled(false);
 ```
 
 ## Create and Get local camera/mic streams
