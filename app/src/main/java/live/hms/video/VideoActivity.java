@@ -1,23 +1,13 @@
 package live.hms.video;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
-import androidx.core.app.NavUtils;
 import androidx.preference.PreferenceManager;
 
 import android.Manifest;
-import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.media.AudioManager;
-import android.net.ConnectivityManager;
-import android.net.NetworkCapabilities;
-import android.net.NetworkInfo;
-import android.os.Build;
 import android.os.Bundle;
-import android.util.ArrayMap;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -38,23 +28,15 @@ import com.brytecam.lib.HMSRequestHandler;
 import com.brytecam.lib.HMSRoom;
 import com.brytecam.lib.payload.HMSPayloadData;
 import com.brytecam.lib.payload.HMSStreamInfo;
-import com.brytecam.lib.webrtc.HMSStream;
 import com.brytecam.lib.webrtc.HMSRTCMediaStream;
 import com.brytecam.lib.webrtc.HMSRTCMediaStreamConstraints;
 import com.brytecam.lib.webrtc.HMSWebRTCEglUtils;
 
 import org.webrtc.AudioTrack;
-import org.webrtc.EglBase;
 import org.webrtc.MediaStream;
 import org.webrtc.RendererCommon;
 import org.webrtc.SurfaceViewRenderer;
 import org.webrtc.VideoTrack;
-
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Timer;
-import java.util.TimerTask;
 
 import pub.devrel.easypermissions.AfterPermissionGranted;
 import pub.devrel.easypermissions.EasyPermissions;
@@ -550,7 +532,6 @@ public class VideoActivity extends AppCompatActivity implements HMSEventListener
 
     void setTracks(MediaStream data, int position, String name)
     {
-        //totalRemoteUsers++;
         switch (position) {
             case 1:
                 if(data.videoTracks.size()>0) {
@@ -787,7 +768,6 @@ public class VideoActivity extends AppCompatActivity implements HMSEventListener
     public void onStreamAdd(HMSPeer hmsPeer, HMSStreamInfo hmsStreamInfo) {
         Log.v(TAG, "App stream add  event"+hmsPeer.getUid());
 
-        // this code will be executed after 2 seconds
         hmsClient.subscribe(hmsStreamInfo, hmsRoom, new HMSMediaRequestHandler() {
             @Override
             public void onSuccess(MediaStream data) {
@@ -899,8 +879,6 @@ public class VideoActivity extends AppCompatActivity implements HMSEventListener
             {
                 switch(i) {
                     case 1:
-                        //secondSVrenderer.release();
-
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
@@ -911,12 +889,8 @@ public class VideoActivity extends AppCompatActivity implements HMSEventListener
 
                         secondSVrenderer.clearImage();
                         secondSVrenderer.clearAnimation();
-                        //secondSVrenderer = null;
                         break;
                     case 2:
-                        //thirdSVrenderer.release();
-
-
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
@@ -928,7 +902,6 @@ public class VideoActivity extends AppCompatActivity implements HMSEventListener
 
                         thirdSVrenderer.clearImage();
                         thirdSVrenderer.clearAnimation();
-                        //thirdSVrenderer = null;
                         break;
                     case 3:
 
@@ -940,10 +913,9 @@ public class VideoActivity extends AppCompatActivity implements HMSEventListener
                             }
                         });
 
-                        //fourthSVrenderer.setVisibility(View.INVISIBLE);
                         fourthSVrenderer.clearAnimation();
                         fourthSVrenderer.clearImage();
-                        //fourthSVrenderer =null;
+
                         break;
                     case 4:
                         runOnUiThread(new Runnable() {
