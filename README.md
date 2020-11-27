@@ -177,6 +177,14 @@ HMSEventListener listener = new HMSEventListener()
 };
 ```
 
+## Switch Camera
+
+```java
+//Toggle between front and rear camera. Make sure you have initialized 
+//hmsclient before calling this
+hmsClient.switchCamera();
+```
+
 ## Mute/unmute local video/audio
 
 Get the local audio/video tracks from **HMSStream.getUserMedia()** method.
@@ -196,34 +204,31 @@ localAudioTrack.setEnabled(false);
 ## Create and Get local camera/mic streams
 
 ```java
-//You can set codec, bitrate, framerate, etc here.
-Map<String, Object> video = new HashMap<>();
-video.put("resolution", "qvga");
-video.put("width", 320);
-video.put("height", 240);
-video.put("framerate", 25);
-video.put("codec", "vp8");
-video.put("bitrate", "128");
-video.put("facingMode", "user");
-//video.put("facingMode", "environment"); -- for rear camera
+//Set all the media constraints here.
+//You can disable video/audio publishing by changing the settings from the settings activity
+//Do it before joining the room
+localMediaConstraints = new HMSRTCMediaStreamConstraints(DEFAULT_PUBLISH_AUDIO, DEFAULT_PUBLISH_VIDEO);
+localMediaConstraints.setVideoCodec(DEFAULT_CODEC);
+localMediaConstraints.setVideoFrameRate(Integer.valueOf(DEFAULT_VIDEO_FRAMERATE));
+localMediaConstraints.setVideoResolution(DEFAULT_VIDEO_RESOLUTION);
+localMediaConstraints.setVideoMaxBitRate(Integer.valueOf(DEFAULT_VIDEO_BITRATE));
+if(frontCamEnabled){
+    isFrontCameraEnabled = true;
+    localMediaConstraints.setCameraFacing(FRONT_FACING_CAMERA);
+}
+else {
+    isFrontCameraEnabled = false;
+    localMediaConstraints.setCameraFacing(REAR_FACING_CAMERA);
+}
 
-Map<String, Object> audio = new HashMap<>();
-if(audioEnabled)
-    audio.put("volume", Double.valueOf("100.0"));
-else
-    audio.put("volume", Double.valueOf("0.0"));
-
-localMediaConstraints = new HMSRTCMediaStreamConstraints(audio, video);
-
-HMSStream.getUserMedia(this, localMediaConstraints, new HMSStream.GetUserMediaListener() {
+hmsClient.getUserMedia(this, localMediaConstraints, new HMSStream.GetUserMediaListener() {
 
     @Override
     public void onSuccess(HMSRTCMediaStream mediaStream) {				//Receive the local media stream
      
-			 localStream = mediaStream;
-			 //Expose Media stream APIs to developers
-			 // process the stream
-			 //And example has been given below
+				 localStream = mediaStream;
+				//Expose Media stream APIs to developers
+				// process the stream
     }
 
     @Override
