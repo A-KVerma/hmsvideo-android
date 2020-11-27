@@ -1,10 +1,12 @@
 package live.hms.video;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.preference.PreferenceManager;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.StrictMode;
@@ -22,6 +24,7 @@ import android.widget.Toast;
 import com.brytecam.lib.HMSClient;
 import com.brytecam.lib.HMSClientConfig;
 import com.brytecam.lib.HMSPeer;
+import com.brytecam.lib.webrtc.HMSStream;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -38,10 +41,22 @@ import okhttp3.Response;
  * Initial login screen with user details
  */
 public class LaunchActivity extends AppCompatActivity {
+    private String TAG = "HMSMainActivity";
     private Button connectButton;
     private EditText roomIdEditText, userIdEditText, serverEditText;
     private String token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhY2Nlc3Nfa2V5IjoiNWY5ZWRjNmJkMjM4MjE1YWVjNzcwMGUyIiwiYXBwX2lkIjoiNWY5ZWRjNmJkMjM4MjE1YWVjNzcwMGUxIiwicm9vbV9pZCI6ImFuZHJvaWQiLCJwZWVyX2lkIjoiSm9obkRvZSIsImlhdCI6MTYwNDYzOTY2OSwiZXhwIjoxNjA0NzI2MDY5LCJpc3MiOiI1ZjllZGM2YmQyMzgyMTVhZWM3NzAwZGYiLCJqdGkiOiIyZDQyODgzYi05NjM0LTRjYzEtOTc5ZC04Zjc4MGVjMGZlMmEifQ.DG-aSav45Kt4DONn6617qPuPx9TMwsyvGjx_QPbwS04";
     private String newToken ="";
+
+    //Settings
+    private SharedPreferences hmsSharedPreferences;
+    private SharedPreferences.OnSharedPreferenceChangeListener hmsSharedPrefListener;
+    private boolean DEFAULT_PUBLISH_VIDEO = true;
+    private boolean DEFAULT_PUBLISH_AUDIO = true;
+    private String DEFAULT_VIDEO_RESOLUTION = "VGA";
+    private String DEFAULT_VIDEO_BITRATE = "256";
+    private String DEFAULT_VIDEO_FRAMERATE = "30";
+    private String DEFAULT_CODEC = "VP8";
+
 
 
     @Override
@@ -77,7 +92,7 @@ public class LaunchActivity extends AppCompatActivity {
 
                 }
                 else {
-                    //Use the get new token method below and modify based on your case
+
                     showWorkingDialog();
                     getNewToken();
 
@@ -98,6 +113,7 @@ public class LaunchActivity extends AppCompatActivity {
         if (item.getItemId() == R.id.action_settings) {
             //Do your stuff here
             Intent callIntent = new Intent(LaunchActivity.this, SettingsActivity.class);
+            callIntent.putExtra("from", "launchscreen");
             startActivity(callIntent);
 
             return true;
@@ -175,6 +191,59 @@ public class LaunchActivity extends AppCompatActivity {
             working_dialog.dismiss();
             working_dialog = null;
         }
+    }
+
+
+    private void initPreferences()
+    {
+        //Loads Shared preferences
+        hmsSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        DEFAULT_PUBLISH_VIDEO = hmsSharedPreferences.getBoolean("publish_video", true);
+        DEFAULT_PUBLISH_AUDIO = hmsSharedPreferences.getBoolean("publish_audio", true);
+        DEFAULT_VIDEO_RESOLUTION = hmsSharedPreferences.getString("resolution", "VGA (640 x 480)");
+        DEFAULT_CODEC = hmsSharedPreferences.getString("codec", "VP8");
+        DEFAULT_VIDEO_BITRATE = hmsSharedPreferences.getString("video_bitrate", "256");
+        DEFAULT_VIDEO_FRAMERATE = hmsSharedPreferences.getString("video_framerate", "30");
+
+        //Setup a shared preference listener
+        hmsSharedPrefListener = new SharedPreferences.OnSharedPreferenceChangeListener() {
+            public void onSharedPreferenceChanged(SharedPreferences prefs, String key) {
+                if (key.equals("publish_video")) {
+                    Log.v(TAG, "Boolean video changes: "+hmsSharedPreferences.getBoolean(key, true));
+                    DEFAULT_PUBLISH_VIDEO = hmsSharedPreferences.getBoolean(key, true);
+                }
+
+                if (key.equals("publish_audio")) {
+                    DEFAULT_PUBLISH_AUDIO = hmsSharedPreferences.getBoolean(key, true);
+                    Log.v(TAG, "Boolean audio changes: "+hmsSharedPreferences.getBoolean(key, true));
+                }
+
+                if (key.equals("resolution")) {
+                    DEFAULT_VIDEO_RESOLUTION = hmsSharedPreferences.getString(key, "VGA (640 x 480)");
+                    Log.v(TAG, "Resolution changes: "+ DEFAULT_VIDEO_RESOLUTION);
+                }
+
+                if(key.equals("codec")){
+                    DEFAULT_CODEC = hmsSharedPreferences.getString(key, "VP8");
+                    Log.v(TAG, "Codec changes: "+ DEFAULT_CODEC);
+                }
+
+                if(key.equals("video_bitrate")){
+                    DEFAULT_VIDEO_BITRATE = hmsSharedPreferences.getString(key, "512");
+                    Log.v(TAG, "Bitrate changes: "+ DEFAULT_VIDEO_BITRATE);
+                }
+
+                if(key.equals("video_framerate")){
+                    DEFAULT_VIDEO_FRAMERATE = hmsSharedPreferences.getString(key, "30");
+                    int val = HMSStream.actualFrameRate;
+                    if(val>1000)
+                        val = val/1000;
+                    hmsSharedPreferences.edit().putString("video_framerate", String.valueOf(val)).commit();
+                    Log.v(TAG, "Framerate changes: "+ DEFAULT_VIDEO_FRAMERATE);
+                }
+            };
+        };
+        hmsSharedPreferences.registerOnSharedPreferenceChangeListener(hmsSharedPrefListener);
     }
 
 

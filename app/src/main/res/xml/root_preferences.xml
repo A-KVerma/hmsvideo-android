@@ -2,6 +2,7 @@
 
     <PreferenceCategory app:title="@string/video_settings">
 
+
         <SwitchPreferenceCompat
             app:key="publish_video"
             app:defaultValue="true"

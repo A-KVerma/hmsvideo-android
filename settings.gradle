@@ -1,5 +1,4 @@
-include ':brytecam-sdk-0.9.0'
-include ':brytecam-sdk-0.9.0'
+include ':brytecam-sdk-0.9.1'
 include ':brytecam-lib-1.0.3'
 include ':app'
 rootProject.name = "HMSVideo-Android"
