@@ -537,6 +537,8 @@ public class VideoActivity extends AppCompatActivity implements HMSEventListener
         //totalRemoteUsers++;
         switch (position) {
             case 1:
+
+                Log.v(TAG, "data tracks: "+data.videoTracks.size()+" audiotracks: "+ data.audioTracks.size());
                 if(data.videoTracks.size()>0) {
                     secondSVVideoTrack = data.videoTracks.get(0);
                     secondSVVideoTrack.setEnabled(true);
@@ -552,19 +554,28 @@ public class VideoActivity extends AppCompatActivity implements HMSEventListener
                     @Override
                     public void run() {
                         if(name!=null)
-                            secondPeerTextView.setText(name);
+                        {
+                            if(data.videoTracks.size()>0 && data.audioTracks.size()>0)
+                                secondPeerTextView.setText("AV: "+name);
+                            if(data.videoTracks.size()==0 && data.audioTracks.size()>0)
+                                secondPeerTextView.setText("audio: "+name);
+                            if(data.videoTracks.size()>0 && data.audioTracks.size()==0)
+                                secondPeerTextView.setText("video: "+name);
+                        }
 
-                        Log.v(TAG, "Second Sv rendered");
+
+
                         secondSVrenderer = (SurfaceViewRenderer) findViewById(R.id.surface_view2);
                         secondSVrenderer.setVisibility(View.VISIBLE);
 
-                        if (secondSVrenderer == null) {
-                            secondSVrenderer.init(HMSWebRTCEglUtils.getRootEglBaseContext(), null);
-                            secondSVrenderer.setScalingType(RendererCommon.ScalingType.SCALE_ASPECT_FILL);
-                            secondSVrenderer.setEnableHardwareScaler(true);
+                        if(data.videoTracks.size()>0) {
+                            if (secondSVrenderer == null) {
+                                secondSVrenderer.init(HMSWebRTCEglUtils.getRootEglBaseContext(), null);
+                                secondSVrenderer.setScalingType(RendererCommon.ScalingType.SCALE_ASPECT_FILL);
+                                secondSVrenderer.setEnableHardwareScaler(true);
+                            }
+                            secondSVVideoTrack.addSink(secondSVrenderer);
                         }
-
-                        secondSVVideoTrack.addSink(secondSVrenderer);
 
                     }
                 });
@@ -585,18 +596,25 @@ public class VideoActivity extends AppCompatActivity implements HMSEventListener
                     @Override
                     public void run() {
                         if(name!=null)
-                            thirdPeerTextView.setText(name);
+                        {
+                            if(data.videoTracks.size()>0 && data.audioTracks.size()>0)
+                                thirdPeerTextView.setText("AV: "+name);
+                            if(data.videoTracks.size()==0 && data.audioTracks.size()>0)
+                                thirdPeerTextView.setText("audio: "+name);
+                            if(data.videoTracks.size()>0 && data.audioTracks.size()==0)
+                                thirdPeerTextView.setText("video: "+name);
+                        }
 
                         thirdSVrenderer = (SurfaceViewRenderer) findViewById(R.id.surface_view3);
                         thirdSVrenderer.setVisibility(View.VISIBLE);
-
-                        if(thirdSVrenderer==null) {
-                            thirdSVrenderer.init(HMSWebRTCEglUtils.getRootEglBaseContext(), null);
-                            thirdSVrenderer.setScalingType(RendererCommon.ScalingType.SCALE_ASPECT_FILL);
-                            thirdSVrenderer.setEnableHardwareScaler(true);
+                        if(data.videoTracks.size()>0) {
+                            if (thirdSVrenderer == null) {
+                                thirdSVrenderer.init(HMSWebRTCEglUtils.getRootEglBaseContext(), null);
+                                thirdSVrenderer.setScalingType(RendererCommon.ScalingType.SCALE_ASPECT_FILL);
+                                thirdSVrenderer.setEnableHardwareScaler(true);
+                            }
+                            thirdSVVideoTrack.addSink(thirdSVrenderer);
                         }
-                        thirdSVVideoTrack.addSink(thirdSVrenderer);
-
                     }
                 });
 
@@ -617,18 +635,27 @@ public class VideoActivity extends AppCompatActivity implements HMSEventListener
                     @Override
                     public void run() {
                         if(name!=null)
-                            fourthPeerTextView.setText(name);
+                        {
+                            if(data.videoTracks.size()>0 && data.audioTracks.size()>0)
+                                fourthPeerTextView.setText("AV: "+name);
+                            if(data.videoTracks.size()==0 && data.audioTracks.size()>0)
+                                fourthPeerTextView.setText("audio: "+name);
+                            if(data.videoTracks.size()>0 && data.audioTracks.size()==0)
+                                fourthPeerTextView.setText("video: "+name);
+                        }
+
 
                         fourthSVrenderer = (SurfaceViewRenderer) findViewById(R.id.surface_view4);
                         fourthSVrenderer.setVisibility(View.VISIBLE);
-                        if(fourthSVrenderer==null) {
-                            fourthSVrenderer.init(HMSWebRTCEglUtils.getRootEglBaseContext(), null);
-                            fourthSVrenderer.setScalingType(RendererCommon.ScalingType.SCALE_ASPECT_FILL);
-                            fourthSVrenderer.setEnableHardwareScaler(true);
+                        if(data.videoTracks.size()>0) {
+                            if (fourthSVrenderer == null) {
+                                fourthSVrenderer.init(HMSWebRTCEglUtils.getRootEglBaseContext(), null);
+                                fourthSVrenderer.setScalingType(RendererCommon.ScalingType.SCALE_ASPECT_FILL);
+                                fourthSVrenderer.setEnableHardwareScaler(true);
 
+                            }
+                            fourthSVVideoTrack.addSink(fourthSVrenderer);
                         }
-                        fourthSVVideoTrack.addSink(fourthSVrenderer);
-
                     }
                 });
 
@@ -648,19 +675,28 @@ public class VideoActivity extends AppCompatActivity implements HMSEventListener
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
+
                         if(name!=null)
-                            fifthPeerTextView.setText(name);
+                        {
+                            if(data.videoTracks.size()>0 && data.audioTracks.size()>0)
+                                fifthPeerTextView.setText("AV: "+name);
+                            if(data.videoTracks.size()==0 && data.audioTracks.size()>0)
+                                fifthPeerTextView.setText("audio: "+name);
+                            if(data.videoTracks.size()>0 && data.audioTracks.size()==0)
+                                fifthPeerTextView.setText("video: "+name);
+                        }
 
                         fifthSVrenderer = (SurfaceViewRenderer) findViewById(R.id.surface_view5);
                         fifthSVrenderer.setVisibility(View.VISIBLE);
-                        if(fifthSVrenderer == null) {
-                            fifthSVrenderer.init(HMSWebRTCEglUtils.getRootEglBaseContext(), null);
-                            fifthSVrenderer.setScalingType(RendererCommon.ScalingType.SCALE_ASPECT_FILL);
-                            fifthSVrenderer.setEnableHardwareScaler(true);
+                        if(data.videoTracks.size()>0) {
+                            if (fifthSVrenderer == null) {
+                                fifthSVrenderer.init(HMSWebRTCEglUtils.getRootEglBaseContext(), null);
+                                fifthSVrenderer.setScalingType(RendererCommon.ScalingType.SCALE_ASPECT_FILL);
+                                fifthSVrenderer.setEnableHardwareScaler(true);
 
+                            }
+                            fifthSVVideoTrack.addSink(fifthSVrenderer);
                         }
-                        fifthSVVideoTrack.addSink(fifthSVrenderer);
-
                     }
                 });
 
@@ -676,23 +712,33 @@ public class VideoActivity extends AppCompatActivity implements HMSEventListener
                     sixthSVAudioTrack.setEnabled(true);
                 }
                 runOnUiThread(new Runnable() {
-                                  @Override
-                                  public void run() {
-                                      if(name!=null)
-                                          sixthPeerTextView.setText(name);
+                      @Override
+                      public void run() {
 
-                                      sixthSVrenderer = (SurfaceViewRenderer) findViewById(R.id.surface_view6);
-                                      sixthSVrenderer.setVisibility(View.VISIBLE);
-                                      if(sixthSVrenderer == null) {
-                                          sixthSVrenderer.init(HMSWebRTCEglUtils.getRootEglBaseContext(), null);
-                                          sixthSVrenderer.setScalingType(RendererCommon.ScalingType.SCALE_ASPECT_FILL);
-                                          sixthSVrenderer.setEnableHardwareScaler(true);
 
-                                      }
-                                      sixthSVVideoTrack.addSink(sixthSVrenderer);
+                          if(name!=null)
+                          {
+                              if(data.videoTracks.size()>0 && data.audioTracks.size()>0)
+                                  sixthPeerTextView.setText("AV: "+name);
+                              if(data.videoTracks.size()==0 && data.audioTracks.size()>0)
+                                  sixthPeerTextView.setText("audio: "+name);
+                              if(data.videoTracks.size()>0 && data.audioTracks.size()==0)
+                                  sixthPeerTextView.setText("video: "+name);
+                          }
 
-                                  }
+                          sixthSVrenderer = (SurfaceViewRenderer) findViewById(R.id.surface_view6);
+                          sixthSVrenderer.setVisibility(View.VISIBLE);
+                          if(data.videoTracks.size()>0) {
+                              if (sixthSVrenderer == null) {
+                                  sixthSVrenderer.init(HMSWebRTCEglUtils.getRootEglBaseContext(), null);
+                                  sixthSVrenderer.setScalingType(RendererCommon.ScalingType.SCALE_ASPECT_FILL);
+                                  sixthSVrenderer.setEnableHardwareScaler(true);
+
                               }
+                              sixthSVVideoTrack.addSink(sixthSVrenderer);
+                          }
+                      }
+                  }
                 );
 
                 break;
@@ -822,10 +868,6 @@ public class VideoActivity extends AppCompatActivity implements HMSEventListener
                 Log.v("HMSClient", "Onsubsuccess");
             }
         });
-
-
-
-
 
     }
 
