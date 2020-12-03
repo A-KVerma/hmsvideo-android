@@ -774,7 +774,7 @@ public class VideoActivity extends AppCompatActivity implements HMSEventListener
 
     @Override
     public void onDisconnect(String errorMessage) {
-        Log.v(TAG, "ondisconnected: "+errorMessage);
+        Log.v(TAG, "ondisconnected: "+ errorMessage);
 
         //Clean up the local streams
         localVideoTrack = null;
@@ -812,11 +812,6 @@ public class VideoActivity extends AppCompatActivity implements HMSEventListener
         }
         sixthSVrenderer = null;
 
-        runOnUiThread(new Runnable() {
-            public void run() {
-                Toast.makeText(getApplicationContext(), errorMessage, Toast.LENGTH_SHORT).show();
-            }
-        });
         //add your retry connection logic here.
     }
 
@@ -844,22 +839,21 @@ public class VideoActivity extends AppCompatActivity implements HMSEventListener
             @Override
             public void onSuccess(MediaStream data) {
 
-                //printAllCelldata();
                 int pos = getFreePosition();
                 Log.v(TAG, "Current free positions: "+pos);
                 if(pos<6) {
                     userIdHolder[pos] = hmsStreamInfo.getUid();
                     isCellFreeHolder[pos] = false;
 
-                    Log.v(TAG, "Onsubsribesuccess");
-                    Log.v(TAG, "positiin: " + pos);
+                    Log.v(TAG, "On subscribe success");
+                    Log.v(TAG, "position: " + pos);
                     Log.v(TAG, "user id: " + hmsStreamInfo.getUid());
 
                     setTracks(data, pos, hmsStreamInfo.getUserName());
                     printAllCelldata();
                 }
                 if(pos == 7)
-                    Toast.makeText(getApplicationContext(), "No space for new users", Toast.LENGTH_SHORT ).show();
+                    Log.v(TAG, "No more UI space for additional users but you can hear the audio");
 
             }
 
