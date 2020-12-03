@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     android:layout_margin="20dp"
     android:orientation="vertical"
-    tools:context="com.brytecam.android.MainActivity">
+    >
 
     <TextView
         android:layout_width="match_parent"
@@ -22,7 +22,7 @@
         android:layout_height="wrap_content"
         android:ems="10"
         android:inputType="text"
-        android:text="wss://conf.brytecam.com/ws" />
+        android:text="wss://staging.brytecam.com/ws" />
 
     <TextView
         android:layout_width="match_parent"

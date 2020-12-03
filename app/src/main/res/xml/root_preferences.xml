@@ -9,9 +9,7 @@
             app:title="@string/video_publish" />
 
         <ListPreference
-            app:defaultValue="VGA (640 x 480)"
-            app:entries="@array/videoResolutions"
-            app:entryValues="@array/videoResolutionsValues"
+
             app:key="resolution"
             app:title="@string/video_resolution"
             app:useSimpleSummaryProvider="true" />
@@ -24,10 +22,11 @@
             app:title="@string/video_codec"
             app:useSimpleSummaryProvider="true" />
 
-        <!--        <EditTextPreference-->
-        <!--            app:key="video_bitrate"-->
-        <!--            app:title="@string/video_maxbitrate"-->
-        <!--            app:useSimpleSummaryProvider="true" />-->
+        <EditTextPreference
+            app:key="video_bitrate"
+            app:defaultValue="256"
+            app:title="@string/video_maxbitrate"
+            app:useSimpleSummaryProvider="true" />
 
         <EditTextPreference
             app:key="video_framerate"

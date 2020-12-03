@@ -1,23 +1,9 @@
 package live.hms.video;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.RequiresApi;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
-import androidx.core.app.NavUtils;
-import androidx.preference.PreferenceManager;
-
 import android.Manifest;
-import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.media.AudioManager;
-import android.net.ConnectivityManager;
-import android.net.NetworkCapabilities;
-import android.net.NetworkInfo;
-import android.os.Build;
 import android.os.Bundle;
-import android.util.ArrayMap;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -27,6 +13,10 @@ import android.view.WindowManager;
 import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.preference.PreferenceManager;
 
 
 import com.brytecam.lib.HMSClient;
@@ -39,23 +29,16 @@ import com.brytecam.lib.HMSRequestHandler;
 import com.brytecam.lib.HMSRoom;
 import com.brytecam.lib.payload.HMSPayloadData;
 import com.brytecam.lib.payload.HMSStreamInfo;
-import com.brytecam.lib.webrtc.HMSStream;
 import com.brytecam.lib.webrtc.HMSRTCMediaStream;
 import com.brytecam.lib.webrtc.HMSRTCMediaStreamConstraints;
+import com.brytecam.lib.webrtc.HMSStream;
 import com.brytecam.lib.webrtc.HMSWebRTCEglUtils;
 
 import org.webrtc.AudioTrack;
-import org.webrtc.EglBase;
 import org.webrtc.MediaStream;
 import org.webrtc.RendererCommon;
 import org.webrtc.SurfaceViewRenderer;
 import org.webrtc.VideoTrack;
-
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Timer;
-import java.util.TimerTask;
 
 import pub.devrel.easypermissions.AfterPermissionGranted;
 import pub.devrel.easypermissions.EasyPermissions;
@@ -110,7 +93,7 @@ public class VideoActivity extends AppCompatActivity implements HMSEventListener
     private SharedPreferences.OnSharedPreferenceChangeListener hmsSharedPrefListener;
     private boolean DEFAULT_PUBLISH_VIDEO = true;
     private boolean DEFAULT_PUBLISH_AUDIO = true;
-    private String DEFAULT_VIDEO_RESOLUTION = "VGA";
+    private String DEFAULT_VIDEO_RESOLUTION = "640 x 480";
     private String DEFAULT_VIDEO_BITRATE = "256";
     private String DEFAULT_VIDEO_FRAMERATE = "30";
     private String DEFAULT_CODEC = "VP8";
@@ -190,7 +173,7 @@ public class VideoActivity extends AppCompatActivity implements HMSEventListener
         hmsSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
         DEFAULT_PUBLISH_VIDEO = hmsSharedPreferences.getBoolean("publish_video", true);
         DEFAULT_PUBLISH_AUDIO = hmsSharedPreferences.getBoolean("publish_audio", true);
-        DEFAULT_VIDEO_RESOLUTION = hmsSharedPreferences.getString("resolution", "VGA (640 x 480)");
+        DEFAULT_VIDEO_RESOLUTION = hmsSharedPreferences.getString("resolution", "640 x 480");
         DEFAULT_CODEC = hmsSharedPreferences.getString("codec", "VP8");
         DEFAULT_VIDEO_BITRATE = hmsSharedPreferences.getString("video_bitrate", "256");
         DEFAULT_VIDEO_FRAMERATE = hmsSharedPreferences.getString("video_framerate", "30");
@@ -223,12 +206,13 @@ public class VideoActivity extends AppCompatActivity implements HMSEventListener
                         localAudioTrack.setEnabled(true);
                     else
                         localAudioTrack.setEnabled(false);
-
                 }
 
                 if (key.equals("resolution")) {
                     DEFAULT_VIDEO_RESOLUTION = hmsSharedPreferences.getString(key, "VGA (640 x 480)");
                     Log.v(TAG, "Resolution changes: "+ DEFAULT_VIDEO_RESOLUTION);
+                    localMediaConstraints.setVideoResolution(DEFAULT_VIDEO_RESOLUTION);
+                    hmsClient.applyResolution(localMediaConstraints);
                 }
 
                 if(key.equals("codec")){
@@ -239,14 +223,13 @@ public class VideoActivity extends AppCompatActivity implements HMSEventListener
                 if(key.equals("video_bitrate")){
                     DEFAULT_VIDEO_BITRATE = hmsSharedPreferences.getString(key, "512");
                     Log.v(TAG, "Bitrate changes: "+ DEFAULT_VIDEO_BITRATE);
+                    hmsClient.setBitrate(Integer.valueOf(DEFAULT_VIDEO_BITRATE)*1000);
                 }
 
                 if(key.equals("video_framerate")){
                     DEFAULT_VIDEO_FRAMERATE = hmsSharedPreferences.getString(key, "30");
-                    int val = HMSStream.actualFrameRate;
-                    if(val>1000)
-                        val = val/1000;
-                    hmsSharedPreferences.edit().putString("video_framerate", String.valueOf(val)).commit();
+                    if(firstSVrenderer!=null)
+                        firstSVrenderer.setFpsReduction(Float.parseFloat(DEFAULT_VIDEO_FRAMERATE));
                     Log.v(TAG, "Framerate changes: "+ DEFAULT_VIDEO_FRAMERATE);
                 }
             };
@@ -356,7 +339,6 @@ public class VideoActivity extends AppCompatActivity implements HMSEventListener
                     firstSVrenderer.setEnableHardwareScaler(true);
                     firstSVrenderer.setMirror(true);
 
-
                     secondSVrenderer = (SurfaceViewRenderer) findViewById(R.id.surface_view2);
                     secondSVrenderer.init(HMSWebRTCEglUtils.getRootEglBaseContext(), null);
                     secondSVrenderer.setScalingType(RendererCommon.ScalingType.SCALE_ASPECT_FILL);
@@ -402,23 +384,6 @@ public class VideoActivity extends AppCompatActivity implements HMSEventListener
 
     public void getUserMedia(boolean frontCamEnabled, boolean audioEnabled, boolean cameraToggle)
     {
-
-        if(cameraToggle)
-        {
-            hmsClient.unpublish(localMediaStream, hmsRoom, new HMSRequestHandler() {
-                @Override
-                public void onSuccess(String data) {
-                    Log.v(TAG, "unpusblish success: "+data);
-                }
-
-                @Override
-                public void onFailure(long error, String errorReason) {
-                    Log.v(TAG, "unpusblish failure"+errorReason);
-                }
-            });
-        }
-
-
         localMediaConstraints = new HMSRTCMediaStreamConstraints(true, DEFAULT_PUBLISH_VIDEO);
         localMediaConstraints.setVideoCodec(DEFAULT_CODEC);
         localMediaConstraints.setVideoFrameRate(Integer.valueOf(DEFAULT_VIDEO_FRAMERATE));
@@ -563,8 +528,6 @@ public class VideoActivity extends AppCompatActivity implements HMSEventListener
                 Log.v(TAG, "unpublish failure"+errorReason);
             }
         });
-
-
 
     }
 
@@ -740,16 +703,6 @@ public class VideoActivity extends AppCompatActivity implements HMSEventListener
     }
 
 
-    void setMediaStreamConstraints(HMSRTCMediaStreamConstraints constraints)
-    {
-
-    }
-
-
-
-
-
-
     @Override
     public void onConnect() {
         Log.v(TAG, "You should be able to see local camera feed once the network connection is established and the user is able to join the room");
@@ -771,16 +724,48 @@ public class VideoActivity extends AppCompatActivity implements HMSEventListener
                 }
             });
         }
-
-
-
-
-
     }
 
     @Override
     public void onDisconnect(String errorMessage) {
         Log.v(TAG, "ondisconnected: "+errorMessage);
+
+        //Clean up the local streams
+        localVideoTrack = null;
+        localAudioTrack = null;
+        localMediaStream = null;
+
+        if(firstSVrenderer!=null) {
+            firstSVrenderer.release();
+            firstSVrenderer.clearImage();
+        }
+        firstSVrenderer = null;
+        if(secondSVrenderer!=null){
+            secondSVrenderer.release();
+            secondSVrenderer.clearImage();
+        }
+        secondSVrenderer = null;
+        if(thirdSVrenderer!=null) {
+            thirdSVrenderer.release();
+            thirdSVrenderer.clearImage();
+        }
+        thirdSVrenderer = null;
+        if(fourthSVrenderer!=null) {
+            fourthSVrenderer.release();
+            fourthSVrenderer.clearImage();
+        }
+        fourthSVrenderer = null;
+        if(fifthSVrenderer!=null) {
+            fifthSVrenderer.release();
+            fifthSVrenderer.clearImage();
+        }
+        fifthSVrenderer = null;
+        if(sixthSVrenderer!=null) {
+            sixthSVrenderer.release();
+            sixthSVrenderer.clearImage();
+        }
+        sixthSVrenderer = null;
+
         runOnUiThread(new Runnable() {
             public void run() {
                 Toast.makeText(getApplicationContext(), errorMessage, Toast.LENGTH_SHORT).show();
@@ -920,8 +905,6 @@ public class VideoActivity extends AppCompatActivity implements HMSEventListener
             {
                 switch(i) {
                     case 1:
-                        //secondSVrenderer.release();
-
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
@@ -932,12 +915,9 @@ public class VideoActivity extends AppCompatActivity implements HMSEventListener
 
                         secondSVrenderer.clearImage();
                         secondSVrenderer.clearAnimation();
-                        //secondSVrenderer = null;
+
                         break;
                     case 2:
-                        //thirdSVrenderer.release();
-
-
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
@@ -946,10 +926,8 @@ public class VideoActivity extends AppCompatActivity implements HMSEventListener
                             }
                         });
 
-
                         thirdSVrenderer.clearImage();
                         thirdSVrenderer.clearAnimation();
-                        //thirdSVrenderer = null;
                         break;
                     case 3:
 
@@ -961,10 +939,8 @@ public class VideoActivity extends AppCompatActivity implements HMSEventListener
                             }
                         });
 
-                        //fourthSVrenderer.setVisibility(View.INVISIBLE);
                         fourthSVrenderer.clearAnimation();
                         fourthSVrenderer.clearImage();
-                        //fourthSVrenderer =null;
                         break;
                     case 4:
                         runOnUiThread(new Runnable() {
@@ -975,10 +951,8 @@ public class VideoActivity extends AppCompatActivity implements HMSEventListener
                             }
                         });
 
-
                         fifthSVrenderer.clearImage();
                         fifthSVrenderer.clearAnimation();
-
                         break;
                     case 5:
                         runOnUiThread(new Runnable() {
@@ -988,8 +962,6 @@ public class VideoActivity extends AppCompatActivity implements HMSEventListener
                                     sixthSVrenderer.setVisibility(View.INVISIBLE);
                             }
                         });
-
-
                         sixthSVrenderer.clearImage();
                         sixthSVrenderer.clearAnimation();
 
