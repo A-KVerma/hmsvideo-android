@@ -1,8 +1,10 @@
 package live.hms.video;
 
 import android.Manifest;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.media.AudioManager;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -223,7 +225,8 @@ public class VideoActivity extends AppCompatActivity implements HMSEventListener
                 if(key.equals("video_bitrate")){
                     DEFAULT_VIDEO_BITRATE = hmsSharedPreferences.getString(key, "512");
                     Log.v(TAG, "Bitrate changes: "+ DEFAULT_VIDEO_BITRATE);
-                    hmsClient.setBitrate(Integer.valueOf(DEFAULT_VIDEO_BITRATE)*1000);
+                    if(hmsClient!=null)
+                        hmsClient.setBitrate(Integer.valueOf(DEFAULT_VIDEO_BITRATE)*1000);
                 }
 
                 if(key.equals("video_framerate")){
@@ -295,19 +298,29 @@ public class VideoActivity extends AppCompatActivity implements HMSEventListener
 
 
     public void toggleMic() {
-
+        AudioManager audioManager =(AudioManager)getSystemService(Context.AUDIO_SERVICE);
         if(localAudioTrack!=null)
         {
             if(localAudioTrack.enabled())
             {
                 isAudioEnabled = false;
                 localAudioTrack.setEnabled(false);
+                if(audioManager!=null) {
+                    audioManager.setMode(AudioManager.MODE_IN_CALL);
+                    audioManager.setMode(AudioManager.MODE_NORMAL);
+                }
             }
             else
             {
                 isAudioEnabled = true;
                 localAudioTrack.setEnabled(true);
+                if(audioManager!=null) {
+                    audioManager.setMode(AudioManager.MODE_NORMAL);
+                    audioManager.setMode(AudioManager.MODE_IN_CALL);
+                }
             }
+            if(audioManager!=null)
+                audioManager.setSpeakerphoneOn(isAudioEnabled);
         }
     }
 
