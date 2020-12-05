@@ -117,7 +117,7 @@ public class LaunchActivity extends AppCompatActivity {
         JSONObject jsonObject = new JSONObject();
         try {
             jsonObject.put("room_id", roomIdEditText.getText().toString());
-            jsonObject.put("peer_id", userIdEditText.getText().toString());
+            jsonObject.put("user_name", userIdEditText.getText().toString());
             jsonObject.put("env", serverEditText.getText().toString().split("\\.")[0].replace("wss://", "") );
         } catch (JSONException e) {
             e.printStackTrace();
@@ -130,7 +130,7 @@ public class LaunchActivity extends AppCompatActivity {
         RequestBody body = RequestBody.create(JSON, jsonObject.toString());
 
         Request request = new Request.Builder()
-                .url("https://ms-internal-apps-token-service-klly5pwlrz1c.runkit.sh/")
+                .url("https://100ms-services.vercel.app/api/token/")
                 .post(body)
                 .build();
 
