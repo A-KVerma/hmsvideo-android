@@ -70,18 +70,6 @@ public class VideoActivity extends AppCompatActivity implements HMSEventListener
     private VideoTrack[] remoteVideoTracks = new VideoTrack[TOTAL_REMOTE_PEERS];
     private AudioTrack[] remoteAudioTracks = new AudioTrack[TOTAL_REMOTE_PEERS];
 
-
-//
-//    VideoTrack secondSVVideoTrack= null;
-//    AudioTrack secondSVAudioTrack = null;
-//    VideoTrack thirdSVVideoTrack= null;
-//    AudioTrack thirdSVAudioTrack = null;
-//    VideoTrack fourthSVVideoTrack= null;
-//    AudioTrack fourthSVAudioTrack = null;
-//    VideoTrack fifthSVVideoTrack= null;
-//    AudioTrack fifthSVAudioTrack = null;
-//    VideoTrack sixthSVVideoTrack= null;
-//    AudioTrack sixthSVAudioTrack = null;
     boolean isCameraToggled = false;
     boolean isAudioEnabled = true;
     boolean isFrontCameraEnabled = true;
@@ -550,11 +538,11 @@ public class VideoActivity extends AppCompatActivity implements HMSEventListener
                 if(name!=null)
                 {
                     if(data.videoTracks.size()>0 && data.audioTracks.size()>0)
-                        remoteTextViews[position-1].setText("AV: "+name);
-                    if(data.videoTracks.size()==0 && data.audioTracks.size()>0)
-                        remoteTextViews[position-1].setText("audio: "+name);
-                    if(data.videoTracks.size()>0 && data.audioTracks.size()==0)
-                        remoteTextViews[position-1].setText("video: "+name);
+                        remoteTextViews[position-1].setText(name);
+//                    if(data.videoTracks.size()==0 && data.audioTracks.size()>0)
+//                        remoteTextViews[position-1].setText("audio: "+name);
+//                    if(data.videoTracks.size()>0 && data.audioTracks.size()==0)
+//                        remoteTextViews[position-1].setText("video: "+name);
                 }
 
                 if(position == 1)
@@ -756,22 +744,24 @@ public class VideoActivity extends AppCompatActivity implements HMSEventListener
 
     void clearCellData()
     {
-
-        for(cell=0;cell<5;cell++){
-            if(userIdHolder[cell]==null)
-            {
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        if(remoteSurfaceViewRenderers[cell]!=null)
-                            remoteSurfaceViewRenderers[cell].setVisibility(View.INVISIBLE);
+        try {
+            for (cell = 0; cell < 6; cell++) {
+                if (userIdHolder[cell] == null) {
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            if (remoteSurfaceViewRenderers[cell] != null)
+                                remoteSurfaceViewRenderers[cell].setVisibility(View.INVISIBLE);
+                        }
+                    });
+                    if (remoteSurfaceViewRenderers[cell] != null){
+                    remoteSurfaceViewRenderers[cell].clearImage();
+                    remoteSurfaceViewRenderers[cell].clearAnimation();
                     }
-                });
-
-                remoteSurfaceViewRenderers[cell].clearImage();
-                remoteSurfaceViewRenderers[cell].clearAnimation();
+                }
             }
         }
+        catch (Exception e){e.printStackTrace();}
     }
 
 
