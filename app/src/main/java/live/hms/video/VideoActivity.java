@@ -50,35 +50,44 @@ import pub.devrel.easypermissions.EasyPermissions;
 public class VideoActivity extends AppCompatActivity implements HMSEventListener {
 
     private String TAG = "HMSVideoActivity";
-    HMSPeer peer ;
-    HMSRoom hmsRoom;
+    private HMSPeer peer ;
+    private HMSRoom hmsRoom;
     //Create client configuration
-    HMSClientConfig config ;
+    private HMSClientConfig config ;
     //Create a 100ms client
-    HMSClient hmsClient;
-    HMSRTCMediaStreamConstraints localMediaConstraints;
+    private HMSClient hmsClient;
+    private HMSRTCMediaStreamConstraints localMediaConstraints;
     private String roomname = null, username = null, authToken = null, servername = null, bitRate = null, env = null;
     private boolean isPublished = false, isJoined = false;
     private HMSRTCMediaStream localMediaStream = null;
-    HMSRTCMediaStreamConstraints localMediaStreamConstraints = null;
-    VideoTrack localVideoTrack = null;
-    AudioTrack localAudioTrack = null;
-    VideoTrack secondSVVideoTrack= null;
-    AudioTrack secondSVAudioTrack = null;
-    VideoTrack thirdSVVideoTrack= null;
-    AudioTrack thirdSVAudioTrack = null;
-    VideoTrack fourthSVVideoTrack= null;
-    AudioTrack fourthSVAudioTrack = null;
-    VideoTrack fifthSVVideoTrack= null;
-    AudioTrack fifthSVAudioTrack = null;
-    VideoTrack sixthSVVideoTrack= null;
-    AudioTrack sixthSVAudioTrack = null;
+    private VideoTrack localVideoTrack = null;
+    private AudioTrack localAudioTrack = null;
+
+    private int TOTAL_REMOTE_PEERS = 5;
+
+    private SurfaceViewRenderer[] remoteSurfaceViewRenderers = new SurfaceViewRenderer[TOTAL_REMOTE_PEERS];
+    private TextView[] remoteTextViews = new TextView[TOTAL_REMOTE_PEERS];
+    private VideoTrack[] remoteVideoTracks = new VideoTrack[TOTAL_REMOTE_PEERS];
+    private AudioTrack[] remoteAudioTracks = new AudioTrack[TOTAL_REMOTE_PEERS];
+
+
+//
+//    VideoTrack secondSVVideoTrack= null;
+//    AudioTrack secondSVAudioTrack = null;
+//    VideoTrack thirdSVVideoTrack= null;
+//    AudioTrack thirdSVAudioTrack = null;
+//    VideoTrack fourthSVVideoTrack= null;
+//    AudioTrack fourthSVAudioTrack = null;
+//    VideoTrack fifthSVVideoTrack= null;
+//    AudioTrack fifthSVAudioTrack = null;
+//    VideoTrack sixthSVVideoTrack= null;
+//    AudioTrack sixthSVAudioTrack = null;
     boolean isCameraToggled = false;
     boolean isAudioEnabled = true;
     boolean isFrontCameraEnabled = true;
-    Boolean[] isCellFreeHolder = {true, true, true, true, true, true};
-
-    String[] userIdHolder = new String[6];
+    private Boolean[] isCellFreeHolder = {true, true, true, true, true, true};
+    private int cell =0;
+    private String[] userIdHolder = new String[6];
 
     // Control buttons for limited UI
     private ImageButton disconnectButton;
@@ -86,8 +95,8 @@ public class VideoActivity extends AppCompatActivity implements HMSEventListener
     private ImageButton toggleMuteButton;
 
 
-    private SurfaceViewRenderer firstSVrenderer, secondSVrenderer, thirdSVrenderer, fourthSVrenderer, fifthSVrenderer, sixthSVrenderer;
-    private TextView firstPeerTextView, secondPeerTextView, thirdPeerTextView, fourthPeerTextView, fifthPeerTextView, sixthPeerTextView;
+    private SurfaceViewRenderer localSurfaceViewRenderer;
+    private TextView localPeerTextView;
 
     private static final int RC_CALL = 111;
 
@@ -204,12 +213,12 @@ public class VideoActivity extends AppCompatActivity implements HMSEventListener
 
                     if(DEFAULT_PUBLISH_VIDEO ){
                         localVideoTrack.setEnabled(true);
-                        localVideoTrack.addSink(firstSVrenderer);
+                        localVideoTrack.addSink(localSurfaceViewRenderer);
                     }
                     else
                     {
                         localVideoTrack.setEnabled(false);
-                        localVideoTrack.removeSink(firstSVrenderer);
+                        localVideoTrack.removeSink(localSurfaceViewRenderer);
                     }
                 }
 
@@ -243,8 +252,6 @@ public class VideoActivity extends AppCompatActivity implements HMSEventListener
 
                 if(key.equals("video_framerate")){
                     DEFAULT_VIDEO_FRAMERATE = hmsSharedPreferences.getString(key, "30");
-                    if(firstSVrenderer!=null)
-                        firstSVrenderer.setFpsReduction(Float.parseFloat(DEFAULT_VIDEO_FRAMERATE));
                     Log.v(TAG, "Framerate changes: "+ DEFAULT_VIDEO_FRAMERATE);
                 }
             };
@@ -257,6 +264,8 @@ public class VideoActivity extends AppCompatActivity implements HMSEventListener
     {
         //Create a 100ms peer
         peer = new HMSPeer(username, authToken);
+
+        if(peer.getRoomId()==null)
 
         //Create a room
         hmsRoom = new HMSRoom(roomname);
@@ -343,57 +352,39 @@ public class VideoActivity extends AppCompatActivity implements HMSEventListener
         if(HMSWebRTCEglUtils.getRootEglBaseContext()==null)
             HMSWebRTCEglUtils.getRootEglBase();
 
-        firstPeerTextView = (TextView) findViewById(R.id.firstpeer_textview);
-        secondPeerTextView = (TextView) findViewById(R.id.secondpeer_textview);
-        thirdPeerTextView = (TextView) findViewById(R.id.thirdpeer_textview);
-        fourthPeerTextView = (TextView) findViewById(R.id.fourthpeer_textview);
-        fifthPeerTextView = (TextView) findViewById(R.id.fifthpeer_textview);
-        sixthPeerTextView = (TextView) findViewById(R.id.sixthpeer_textview);
+        localPeerTextView = (TextView) findViewById(R.id.firstpeer_textview);
+        remoteTextViews[0] = (TextView) findViewById(R.id.secondpeer_textview);
+        remoteTextViews[1] = (TextView) findViewById(R.id.thirdpeer_textview);
+        remoteTextViews[2] = (TextView) findViewById(R.id.fourthpeer_textview);
+        remoteTextViews[3] = (TextView) findViewById(R.id.fifthpeer_textview);
+        remoteTextViews[4] = (TextView) findViewById(R.id.sixthpeer_textview);
 
         //Setting local peer name
-        firstPeerTextView.setText(username);
+        localPeerTextView.setText(username);
 
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
                 try {
                     //Init view
-                    firstSVrenderer = (SurfaceViewRenderer) findViewById(R.id.surface_view1);
-                    firstSVrenderer.init(HMSWebRTCEglUtils.getRootEglBaseContext(), null);
-                    firstSVrenderer.setScalingType(RendererCommon.ScalingType.SCALE_ASPECT_FILL);
-                    firstSVrenderer.setEnableHardwareScaler(true);
-                    firstSVrenderer.setMirror(true);
+                    localSurfaceViewRenderer = (SurfaceViewRenderer) findViewById(R.id.surface_view1);
+                    remoteSurfaceViewRenderers[0] = (SurfaceViewRenderer) findViewById(R.id.surface_view2);
+                    remoteSurfaceViewRenderers[1] = (SurfaceViewRenderer) findViewById(R.id.surface_view3);
+                    remoteSurfaceViewRenderers[2] = (SurfaceViewRenderer) findViewById(R.id.surface_view4);
+                    remoteSurfaceViewRenderers[3] = (SurfaceViewRenderer) findViewById(R.id.surface_view5);
+                    remoteSurfaceViewRenderers[4] = (SurfaceViewRenderer) findViewById(R.id.surface_view6);
 
-                    secondSVrenderer = (SurfaceViewRenderer) findViewById(R.id.surface_view2);
-                    secondSVrenderer.init(HMSWebRTCEglUtils.getRootEglBaseContext(), null);
-                    secondSVrenderer.setScalingType(RendererCommon.ScalingType.SCALE_ASPECT_FILL);
-                    secondSVrenderer.setEnableHardwareScaler(true);
-
-
-                    thirdSVrenderer = (SurfaceViewRenderer) findViewById(R.id.surface_view3);
-                    thirdSVrenderer.init(HMSWebRTCEglUtils.getRootEglBaseContext(), null);
-                    thirdSVrenderer.setScalingType(RendererCommon.ScalingType.SCALE_ASPECT_FILL);
-                    thirdSVrenderer.setEnableHardwareScaler(true);
+                    localSurfaceViewRenderer.init(HMSWebRTCEglUtils.getRootEglBaseContext(), null);
+                    localSurfaceViewRenderer.setScalingType(RendererCommon.ScalingType.SCALE_ASPECT_FILL);
+                    localSurfaceViewRenderer.setEnableHardwareScaler(true);
+                    localSurfaceViewRenderer.setMirror(true);
 
 
-                    fourthSVrenderer = (SurfaceViewRenderer) findViewById(R.id.surface_view4);
-                    fourthSVrenderer.init(HMSWebRTCEglUtils.getRootEglBaseContext(), null);
-                    fourthSVrenderer.setScalingType(RendererCommon.ScalingType.SCALE_ASPECT_FILL);
-                    fourthSVrenderer.setEnableHardwareScaler(true);
-
-
-
-                    fifthSVrenderer = (SurfaceViewRenderer) findViewById(R.id.surface_view5);
-                    fifthSVrenderer.init(HMSWebRTCEglUtils.getRootEglBaseContext(), null);
-                    fifthSVrenderer.setScalingType(RendererCommon.ScalingType.SCALE_ASPECT_FILL);
-                    fifthSVrenderer.setEnableHardwareScaler(true);
-
-
-
-                    sixthSVrenderer = (SurfaceViewRenderer) findViewById(R.id.surface_view6);
-                    sixthSVrenderer.init(HMSWebRTCEglUtils.getRootEglBaseContext(), null);
-                    sixthSVrenderer.setScalingType(RendererCommon.ScalingType.SCALE_ASPECT_FILL);
-                    sixthSVrenderer.setEnableHardwareScaler(true);
+                    for(int i=0; i< TOTAL_REMOTE_PEERS; i++){
+                        remoteSurfaceViewRenderers[i].init(HMSWebRTCEglUtils.getRootEglBaseContext(), null);
+                        remoteSurfaceViewRenderers[i].setScalingType(RendererCommon.ScalingType.SCALE_ASPECT_FILL);
+                        remoteSurfaceViewRenderers[i].setEnableHardwareScaler(true);
+                    }
 
                 }
                 catch(Exception e)
@@ -433,12 +424,12 @@ public class VideoActivity extends AppCompatActivity implements HMSEventListener
                 Log.v(TAG, "getusermedia success");
 
                 localMediaStream = mediaStream;
-                if(firstSVrenderer ==null)
+                if(localSurfaceViewRenderer ==null)
                 {
-                    firstSVrenderer.init(HMSWebRTCEglUtils.getRootEglBaseContext(), null);
-                    firstSVrenderer.setScalingType(RendererCommon.ScalingType.SCALE_ASPECT_FILL);
-                    firstSVrenderer.setEnableHardwareScaler(true);
-                    firstSVrenderer.setMirror(true);
+                    localSurfaceViewRenderer.init(HMSWebRTCEglUtils.getRootEglBaseContext(), null);
+                    localSurfaceViewRenderer.setScalingType(RendererCommon.ScalingType.SCALE_ASPECT_FILL);
+                    localSurfaceViewRenderer.setEnableHardwareScaler(true);
+                    localSurfaceViewRenderer.setMirror(true);
                 }
                 if(mediaStream.getStream().videoTracks.size()>0) {
                     localVideoTrack = mediaStream.getStream().videoTracks.get(0);
@@ -457,8 +448,8 @@ public class VideoActivity extends AppCompatActivity implements HMSEventListener
 
                 runOnUiThread(() -> {
                     try {
-                        firstSVrenderer.setVisibility(View.VISIBLE);
-                        localVideoTrack.addSink(firstSVrenderer);
+                        localSurfaceViewRenderer.setVisibility(View.VISIBLE);
+                        localVideoTrack.addSink(localSurfaceViewRenderer);
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
@@ -511,36 +502,19 @@ public class VideoActivity extends AppCompatActivity implements HMSEventListener
         localAudioTrack = null;
         localMediaStream = null;
 
-        if(firstSVrenderer!=null) {
-            firstSVrenderer.release();
-            firstSVrenderer.clearImage();
+        if(localSurfaceViewRenderer!=null) {
+            localSurfaceViewRenderer.release();
+            localSurfaceViewRenderer.clearImage();
         }
-        firstSVrenderer = null;
-        if(secondSVrenderer!=null){
-            secondSVrenderer.release();
-            secondSVrenderer.clearImage();
+        localSurfaceViewRenderer = null;
+
+        for(int i=0; i<TOTAL_REMOTE_PEERS; i++){
+            if(remoteSurfaceViewRenderers[i]!=null){
+                remoteSurfaceViewRenderers[i].release();
+                remoteSurfaceViewRenderers[i].clearImage();
+            }
+            remoteSurfaceViewRenderers[i] = null;
         }
-        secondSVrenderer = null;
-        if(thirdSVrenderer!=null) {
-            thirdSVrenderer.release();
-            thirdSVrenderer.clearImage();
-        }
-        thirdSVrenderer = null;
-        if(fourthSVrenderer!=null) {
-            fourthSVrenderer.release();
-            fourthSVrenderer.clearImage();
-        }
-        fourthSVrenderer = null;
-        if(fifthSVrenderer!=null) {
-            fifthSVrenderer.release();
-            fifthSVrenderer.clearImage();
-        }
-        fifthSVrenderer = null;
-        if(sixthSVrenderer!=null) {
-            sixthSVrenderer.release();
-            sixthSVrenderer.clearImage();
-        }
-        sixthSVrenderer = null;
 
         hmsClient.unpublish(localMediaStream, hmsRoom, new HMSRequestHandler() {
             @Override
@@ -559,217 +533,54 @@ public class VideoActivity extends AppCompatActivity implements HMSEventListener
 
     void setTracks(MediaStream data, int position, String name)
     {
-        //totalRemoteUsers++;
-        switch (position) {
-            case 1:
 
-                Log.v(TAG, "data tracks: "+data.videoTracks.size()+" audiotracks: "+ data.audioTracks.size());
-                if(data.videoTracks.size()>0) {
-                    secondSVVideoTrack = data.videoTracks.get(0);
-                    secondSVVideoTrack.setEnabled(true);
-                }
-                if(data.audioTracks.size()>0)
-                {
-                    secondSVAudioTrack = data.audioTracks.get(0);
-                    secondSVAudioTrack.setEnabled(true);
-                }
-
-
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        if(name!=null)
-                        {
-                            if(data.videoTracks.size()>0 && data.audioTracks.size()>0)
-                                secondPeerTextView.setText("AV: "+name);
-                            if(data.videoTracks.size()==0 && data.audioTracks.size()>0)
-                                secondPeerTextView.setText("audio: "+name);
-                            if(data.videoTracks.size()>0 && data.audioTracks.size()==0)
-                                secondPeerTextView.setText("video: "+name);
-                        }
-
-
-
-                        secondSVrenderer = (SurfaceViewRenderer) findViewById(R.id.surface_view2);
-                        secondSVrenderer.setVisibility(View.VISIBLE);
-
-                        if(data.videoTracks.size()>0) {
-                            if (secondSVrenderer == null) {
-                                secondSVrenderer.init(HMSWebRTCEglUtils.getRootEglBaseContext(), null);
-                                secondSVrenderer.setScalingType(RendererCommon.ScalingType.SCALE_ASPECT_FILL);
-                                secondSVrenderer.setEnableHardwareScaler(true);
-                            }
-                            secondSVVideoTrack.addSink(secondSVrenderer);
-                        }
-
-                    }
-                });
-
-                break;
-            case 2:
-                if(data.videoTracks.size()>0) {
-                    thirdSVVideoTrack = data.videoTracks.get(0);
-                    thirdSVVideoTrack.setEnabled(true);
-                }
-                if(data.audioTracks.size()>0) {
-                    thirdSVAudioTrack = data.audioTracks.get(0);
-                    thirdSVAudioTrack.setEnabled(true);
-                }
-
-
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        if(name!=null)
-                        {
-                            if(data.videoTracks.size()>0 && data.audioTracks.size()>0)
-                                thirdPeerTextView.setText("AV: "+name);
-                            if(data.videoTracks.size()==0 && data.audioTracks.size()>0)
-                                thirdPeerTextView.setText("audio: "+name);
-                            if(data.videoTracks.size()>0 && data.audioTracks.size()==0)
-                                thirdPeerTextView.setText("video: "+name);
-                        }
-
-                        thirdSVrenderer = (SurfaceViewRenderer) findViewById(R.id.surface_view3);
-                        thirdSVrenderer.setVisibility(View.VISIBLE);
-                        if(data.videoTracks.size()>0) {
-                            if (thirdSVrenderer == null) {
-                                thirdSVrenderer.init(HMSWebRTCEglUtils.getRootEglBaseContext(), null);
-                                thirdSVrenderer.setScalingType(RendererCommon.ScalingType.SCALE_ASPECT_FILL);
-                                thirdSVrenderer.setEnableHardwareScaler(true);
-                            }
-                            thirdSVVideoTrack.addSink(thirdSVrenderer);
-                        }
-                    }
-                });
-
-                break;
-            case 3:
-
-                if(data.videoTracks.size()>0) {
-                    fourthSVVideoTrack = data.videoTracks.get(0);
-                    fourthSVVideoTrack.setEnabled(true);
-                }
-
-                if(data.audioTracks.size()>0) {
-                    fourthSVAudioTrack = data.audioTracks.get(0);
-                    fourthSVAudioTrack.setEnabled(true);
-                }
-
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        if(name!=null)
-                        {
-                            if(data.videoTracks.size()>0 && data.audioTracks.size()>0)
-                                fourthPeerTextView.setText("AV: "+name);
-                            if(data.videoTracks.size()==0 && data.audioTracks.size()>0)
-                                fourthPeerTextView.setText("audio: "+name);
-                            if(data.videoTracks.size()>0 && data.audioTracks.size()==0)
-                                fourthPeerTextView.setText("video: "+name);
-                        }
-
-
-                        fourthSVrenderer = (SurfaceViewRenderer) findViewById(R.id.surface_view4);
-                        fourthSVrenderer.setVisibility(View.VISIBLE);
-                        if(data.videoTracks.size()>0) {
-                            if (fourthSVrenderer == null) {
-                                fourthSVrenderer.init(HMSWebRTCEglUtils.getRootEglBaseContext(), null);
-                                fourthSVrenderer.setScalingType(RendererCommon.ScalingType.SCALE_ASPECT_FILL);
-                                fourthSVrenderer.setEnableHardwareScaler(true);
-
-                            }
-                            fourthSVVideoTrack.addSink(fourthSVrenderer);
-                        }
-                    }
-                });
-
-                break;
-            case 4:
-
-                if(data.videoTracks.size()>0) {
-                    fifthSVVideoTrack = data.videoTracks.get(0);
-                    fifthSVVideoTrack.setEnabled(true);
-                }
-                if(data.audioTracks.size()>0) {
-                    fifthSVAudioTrack = data.audioTracks.get(0);
-                    fifthSVAudioTrack.setEnabled(true);
-                }
-
-
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-
-                        if(name!=null)
-                        {
-                            if(data.videoTracks.size()>0 && data.audioTracks.size()>0)
-                                fifthPeerTextView.setText("AV: "+name);
-                            if(data.videoTracks.size()==0 && data.audioTracks.size()>0)
-                                fifthPeerTextView.setText("audio: "+name);
-                            if(data.videoTracks.size()>0 && data.audioTracks.size()==0)
-                                fifthPeerTextView.setText("video: "+name);
-                        }
-
-                        fifthSVrenderer = (SurfaceViewRenderer) findViewById(R.id.surface_view5);
-                        fifthSVrenderer.setVisibility(View.VISIBLE);
-                        if(data.videoTracks.size()>0) {
-                            if (fifthSVrenderer == null) {
-                                fifthSVrenderer.init(HMSWebRTCEglUtils.getRootEglBaseContext(), null);
-                                fifthSVrenderer.setScalingType(RendererCommon.ScalingType.SCALE_ASPECT_FILL);
-                                fifthSVrenderer.setEnableHardwareScaler(true);
-
-                            }
-                            fifthSVVideoTrack.addSink(fifthSVrenderer);
-                        }
-                    }
-                });
-
-                break;
-            case 5:
-
-                if(data.videoTracks.size()>0) {
-                    sixthSVVideoTrack = data.videoTracks.get(0);
-                    sixthSVVideoTrack.setEnabled(true);
-                }
-                if(data.audioTracks.size()>0) {
-                    sixthSVAudioTrack = data.audioTracks.get(0);
-                    sixthSVAudioTrack.setEnabled(true);
-                }
-                runOnUiThread(new Runnable() {
-                      @Override
-                      public void run() {
-
-
-                          if(name!=null)
-                          {
-                              if(data.videoTracks.size()>0 && data.audioTracks.size()>0)
-                                  sixthPeerTextView.setText("AV: "+name);
-                              if(data.videoTracks.size()==0 && data.audioTracks.size()>0)
-                                  sixthPeerTextView.setText("audio: "+name);
-                              if(data.videoTracks.size()>0 && data.audioTracks.size()==0)
-                                  sixthPeerTextView.setText("video: "+name);
-                          }
-
-                          sixthSVrenderer = (SurfaceViewRenderer) findViewById(R.id.surface_view6);
-                          sixthSVrenderer.setVisibility(View.VISIBLE);
-                          if(data.videoTracks.size()>0) {
-                              if (sixthSVrenderer == null) {
-                                  sixthSVrenderer.init(HMSWebRTCEglUtils.getRootEglBaseContext(), null);
-                                  sixthSVrenderer.setScalingType(RendererCommon.ScalingType.SCALE_ASPECT_FILL);
-                                  sixthSVrenderer.setEnableHardwareScaler(true);
-
-                              }
-                              sixthSVVideoTrack.addSink(sixthSVrenderer);
-                          }
-                      }
-                  }
-                );
-
-                break;
-            default:
-                break;
+        if(data.videoTracks.size()>0) {
+            remoteVideoTracks[position-1] = data.videoTracks.get(0);
+            remoteVideoTracks[position-1].setEnabled(true);
         }
+        if(data.audioTracks.size()>0)
+        {
+            remoteAudioTracks[position-1] = data.audioTracks.get(0);
+            remoteAudioTracks[position-1].setEnabled(true);
+        }
+
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                if(name!=null)
+                {
+                    if(data.videoTracks.size()>0 && data.audioTracks.size()>0)
+                        remoteTextViews[position-1].setText("AV: "+name);
+                    if(data.videoTracks.size()==0 && data.audioTracks.size()>0)
+                        remoteTextViews[position-1].setText("audio: "+name);
+                    if(data.videoTracks.size()>0 && data.audioTracks.size()==0)
+                        remoteTextViews[position-1].setText("video: "+name);
+                }
+
+                if(position == 1)
+                    remoteSurfaceViewRenderers[position - 1] = (SurfaceViewRenderer) findViewById(R.id.surface_view2);
+                if(position == 2)
+                    remoteSurfaceViewRenderers[position - 1] = (SurfaceViewRenderer) findViewById(R.id.surface_view3);
+                if(position == 3)
+                    remoteSurfaceViewRenderers[position - 1] = (SurfaceViewRenderer) findViewById(R.id.surface_view4);
+                if(position == 4)
+                    remoteSurfaceViewRenderers[position - 1] = (SurfaceViewRenderer) findViewById(R.id.surface_view5);
+                if(position == 5)
+                    remoteSurfaceViewRenderers[position - 1] = (SurfaceViewRenderer) findViewById(R.id.surface_view6);
+
+                remoteSurfaceViewRenderers[position - 1].setVisibility(View.VISIBLE);
+
+                if(data.videoTracks.size()>0) {
+                    if (remoteSurfaceViewRenderers[position - 1] == null) {
+                        remoteSurfaceViewRenderers[position - 1].init(HMSWebRTCEglUtils.getRootEglBaseContext(), null);
+                        remoteSurfaceViewRenderers[position - 1].setScalingType(RendererCommon.ScalingType.SCALE_ASPECT_FILL);
+                        remoteSurfaceViewRenderers[position - 1].setEnableHardwareScaler(true);
+                    }
+                    remoteVideoTracks[position-1].addSink(remoteSurfaceViewRenderers[position - 1]);
+                }
+
+            }
+        });
 
     }
 
@@ -806,36 +617,20 @@ public class VideoActivity extends AppCompatActivity implements HMSEventListener
         localAudioTrack = null;
         localMediaStream = null;
 
-        if(firstSVrenderer!=null) {
-            firstSVrenderer.release();
-            firstSVrenderer.clearImage();
+        if(localSurfaceViewRenderer!=null) {
+            localSurfaceViewRenderer.release();
+            localSurfaceViewRenderer.clearImage();
         }
-        firstSVrenderer = null;
-        if(secondSVrenderer!=null){
-            secondSVrenderer.release();
-            secondSVrenderer.clearImage();
+        localSurfaceViewRenderer = null;
+
+
+        for(int i=0; i<TOTAL_REMOTE_PEERS; i++){
+            if(remoteSurfaceViewRenderers[i]!=null){
+                remoteSurfaceViewRenderers[i].release();
+                remoteSurfaceViewRenderers[i].clearImage();
+            }
+            remoteSurfaceViewRenderers[i] = null;
         }
-        secondSVrenderer = null;
-        if(thirdSVrenderer!=null) {
-            thirdSVrenderer.release();
-            thirdSVrenderer.clearImage();
-        }
-        thirdSVrenderer = null;
-        if(fourthSVrenderer!=null) {
-            fourthSVrenderer.release();
-            fourthSVrenderer.clearImage();
-        }
-        fourthSVrenderer = null;
-        if(fifthSVrenderer!=null) {
-            fifthSVrenderer.release();
-            fifthSVrenderer.clearImage();
-        }
-        fifthSVrenderer = null;
-        if(sixthSVrenderer!=null) {
-            sixthSVrenderer.release();
-            sixthSVrenderer.clearImage();
-        }
-        sixthSVrenderer = null;
 
         //add your retry connection logic here.
     }
@@ -961,76 +756,20 @@ public class VideoActivity extends AppCompatActivity implements HMSEventListener
 
     void clearCellData()
     {
-        for(int i=0;i<6;i++){
-            if(userIdHolder[i]==null)
+
+        for(cell=0;cell<5;cell++){
+            if(userIdHolder[cell]==null)
             {
-                switch(i) {
-                    case 1:
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                if(secondSVrenderer!=null)
-                                    secondSVrenderer.setVisibility(View.INVISIBLE);
-                            }
-                        });
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        if(remoteSurfaceViewRenderers[cell]!=null)
+                            remoteSurfaceViewRenderers[cell].setVisibility(View.INVISIBLE);
+                    }
+                });
 
-                        secondSVrenderer.clearImage();
-                        secondSVrenderer.clearAnimation();
-
-                        break;
-                    case 2:
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                if(thirdSVrenderer!=null)
-                                    thirdSVrenderer.setVisibility(View.INVISIBLE);
-                            }
-                        });
-
-                        thirdSVrenderer.clearImage();
-                        thirdSVrenderer.clearAnimation();
-                        break;
-                    case 3:
-
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                if(fourthSVrenderer!=null)
-                                    fourthSVrenderer.setVisibility(View.INVISIBLE);
-                            }
-                        });
-
-                        fourthSVrenderer.clearAnimation();
-                        fourthSVrenderer.clearImage();
-                        break;
-                    case 4:
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                if(fifthSVrenderer!=null)
-                                    fifthSVrenderer.setVisibility(View.INVISIBLE);
-                            }
-                        });
-
-                        fifthSVrenderer.clearImage();
-                        fifthSVrenderer.clearAnimation();
-                        break;
-                    case 5:
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                if(sixthSVrenderer!=null)
-                                    sixthSVrenderer.setVisibility(View.INVISIBLE);
-                            }
-                        });
-                        sixthSVrenderer.clearImage();
-                        sixthSVrenderer.clearAnimation();
-
-                        break;
-                    default:
-                        break;
-
-                }
+                remoteSurfaceViewRenderers[cell].clearImage();
+                remoteSurfaceViewRenderers[cell].clearAnimation();
             }
         }
     }

@@ -108,6 +108,11 @@ public class LaunchActivity extends AppCompatActivity {
     void getNewToken()
     {
         String resStr = "";
+
+        if(roomIdEditText.getText().length() == 0) {
+            Toast.makeText(getApplicationContext(), "Room id is a mandatory parameter", Toast.LENGTH_LONG).show();
+        }
+
         // create your json here
         JSONObject jsonObject = new JSONObject();
         try {
