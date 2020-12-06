@@ -364,14 +364,14 @@ public class VideoActivity extends AppCompatActivity implements HMSEventListener
 
                     localSurfaceViewRenderer.init(HMSWebRTCEglUtils.getRootEglBaseContext(), null);
                     localSurfaceViewRenderer.setScalingType(RendererCommon.ScalingType.SCALE_ASPECT_FILL);
-                    localSurfaceViewRenderer.setEnableHardwareScaler(true);
+                    //localSurfaceViewRenderer.setEnableHardwareScaler(true);
                     localSurfaceViewRenderer.setMirror(true);
 
 
                     for(int i=0; i< TOTAL_REMOTE_PEERS; i++){
                         remoteSurfaceViewRenderers[i].init(HMSWebRTCEglUtils.getRootEglBaseContext(), null);
                         remoteSurfaceViewRenderers[i].setScalingType(RendererCommon.ScalingType.SCALE_ASPECT_FILL);
-                        remoteSurfaceViewRenderers[i].setEnableHardwareScaler(true);
+                       // remoteSurfaceViewRenderers[i].setEnableHardwareScaler(true);
                     }
 
                 }
@@ -459,6 +459,7 @@ public class VideoActivity extends AppCompatActivity implements HMSEventListener
                             Log.v(TAG, "publish failure");
                         }
                     });
+
                 }
             }
 
@@ -750,13 +751,13 @@ public class VideoActivity extends AppCompatActivity implements HMSEventListener
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            if (remoteSurfaceViewRenderers[cell] != null)
-                                remoteSurfaceViewRenderers[cell].setVisibility(View.INVISIBLE);
+                            if (remoteSurfaceViewRenderers[cell-1] != null)
+                                remoteSurfaceViewRenderers[cell-1].setVisibility(View.INVISIBLE);
                         }
                     });
-                    if (remoteSurfaceViewRenderers[cell] != null){
-                    remoteSurfaceViewRenderers[cell].clearImage();
-                    remoteSurfaceViewRenderers[cell].clearAnimation();
+                    if (remoteSurfaceViewRenderers[cell-1] != null){
+                        remoteSurfaceViewRenderers[cell-1].clearImage();
+                        remoteSurfaceViewRenderers[cell-1].clearAnimation();
                     }
                 }
             }
