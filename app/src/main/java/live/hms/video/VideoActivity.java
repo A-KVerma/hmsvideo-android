@@ -31,7 +31,9 @@ import com.brytecam.lib.HMSMediaRequestHandler;
 import com.brytecam.lib.HMSPeer;
 import com.brytecam.lib.HMSRequestHandler;
 import com.brytecam.lib.HMSRoom;
+import com.brytecam.lib.HMSStreamRequestHandler;
 import com.brytecam.lib.payload.HMSPayloadData;
+import com.brytecam.lib.payload.HMSPublishStream;
 import com.brytecam.lib.payload.HMSStreamInfo;
 import com.brytecam.lib.webrtc.HMSRTCMediaStream;
 import com.brytecam.lib.webrtc.HMSRTCMediaStreamConstraints;
@@ -444,10 +446,10 @@ public class VideoActivity extends AppCompatActivity implements HMSEventListener
                 });
 
                 if(!isPublished) {
-                    hmsClient.publish(localMediaStream, hmsRoom, localMediaConstraints, new HMSRequestHandler() {
+                    hmsClient.publish(localMediaStream, hmsRoom, localMediaConstraints, new HMSStreamRequestHandler() {
                         @Override
-                        public void onSuccess(String data) {
-                            Log.v(TAG, "publish success");
+                        public void onSuccess(HMSPublishStream data) {
+                            Log.v(TAG, "publish success "+data.getMid());
                             isPublished = true;
                             isCellFreeHolder[0] = false;
                             userIdHolder[0] = peer.getPeerId();
