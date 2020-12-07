@@ -273,18 +273,20 @@ runOnUiThread(() -> {
 A local participant can share her audio, video and data tracks by "publishing" its tracks to the room
 
 ```java
-hmsClient.publish(stream, room, new RequestHandler()
-{
-	@Override
-	public void onSuccess(String data) {
-		Log.v("HMSClient onPublishSuccess", data);
-	}
-	@Override
-	public void onFailure(long error, String errorReason) {
-		Log.v("HMSClient onPublishFailure", errorReason);
-	}
+
+hmsClient.publish(localMediaStream, hmsRoom, localMediaConstraints, new HMSStreamRequestHandler() {
+@Override
+public void onSuccess(HMSPublishStream data) {
+    Log.v(TAG, "publish success "+data.getMid());
+}
+
+@Override
+public void onFailure(long error, String errorReason) {
+    Log.v(TAG, "publish failure");
+}
 });
 ```
+
 
 ## Subscribe
 
