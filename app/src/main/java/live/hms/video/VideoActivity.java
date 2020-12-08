@@ -1,10 +1,13 @@
 package live.hms.video;
 
 import android.Manifest;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.media.AudioManager;
+import android.net.ConnectivityManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
@@ -49,7 +52,7 @@ import org.webrtc.VideoTrack;
 import pub.devrel.easypermissions.AfterPermissionGranted;
 import pub.devrel.easypermissions.EasyPermissions;
 
-public class VideoActivity extends AppCompatActivity implements HMSEventListener {
+public class VideoActivity extends AppCompatActivity implements HMSEventListener, NetworkInterface {
 
     private String TAG = "HMSVideoActivity";
     private HMSPeer peer ;
@@ -89,7 +92,8 @@ public class VideoActivity extends AppCompatActivity implements HMSEventListener
     private TextView localPeerTextView;
 
     private static final int RC_CALL = 111;
-
+    private boolean isNetworkAvailable = true;
+    private boolean shouldReconnect = false;
 
     //Settings
     private SharedPreferences hmsSharedPreferences;
@@ -103,7 +107,7 @@ public class VideoActivity extends AppCompatActivity implements HMSEventListener
     private String FRONT_FACING_CAMERA = "user";
     private String REAR_FACING_CAMERA = "environment";
 
-
+    private BroadcastReceiver networkReceiver = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -131,10 +135,24 @@ public class VideoActivity extends AppCompatActivity implements HMSEventListener
             env = getIntent().getStringExtra("env");
         }
 
+        //Internet connectivity receiver
+        networkReceiver = new NetworkReceiver(this);
+        broadcastIntent();
+
 
         start();
     }
 
+    public void broadcastIntent() {
+        registerReceiver(networkReceiver, new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
+    }
+
+    @Override
+    protected void onPause() {
+        getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        super.onPause();
+        unregisterReceiver(networkReceiver);
+    }
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
@@ -162,13 +180,24 @@ public class VideoActivity extends AppCompatActivity implements HMSEventListener
         return super.onOptionsItemSelected(item);
     }
 
+    @Override
+    public void onNetworkStatusChange(String status) {
+        Log.v(TAG, "Network status change: " + status);
+        if (status.isEmpty() || status.equals("No internet is available") || status.equals("No Internet Connection")) {
 
+        }
+        else
+        {
+            if(shouldReconnect)
+                handleReconnect();
+        }
+    }
 
     @AfterPermissionGranted(RC_CALL)
     void start()
     {
         String[] perms = {Manifest.permission.CAMERA, Manifest.permission.RECORD_AUDIO};
-        if (EasyPermissions.hasPermissions(this, perms)) {
+        if (EasyPermissions.hasPermissions(this, perms) && initNetworkCheck()) {
             initPreferences();
             initHMSClient();
             initializeSurfaceViews();
@@ -179,6 +208,17 @@ public class VideoActivity extends AppCompatActivity implements HMSEventListener
         }
 
     }
+
+    private boolean initNetworkCheck()
+    {
+       String networkStatus = NetworkUtil.getConnectivityStatusString(getApplicationContext());
+       Log.v(TAG, networkStatus);
+       if(networkStatus.isEmpty()||networkStatus.equals("No internet is available")||networkStatus.equals("No Internet Connection")) {
+            return false;
+       }
+       return true;
+    }
+
 
     private void initPreferences()
     {
@@ -349,13 +389,16 @@ public class VideoActivity extends AppCompatActivity implements HMSEventListener
         remoteTextViews[3] = (TextView) findViewById(R.id.fifthpeer_textview);
         remoteTextViews[4] = (TextView) findViewById(R.id.sixthpeer_textview);
 
-        //Setting local peer name
-        localPeerTextView.setText(username);
+
 
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
                 try {
+
+                    //Setting local peer name
+                    localPeerTextView.setText(username);
+
                     //Init view
                     localSurfaceViewRenderer = (SurfaceViewRenderer) findViewById(R.id.surface_view1);
                     remoteSurfaceViewRenderers[0] = (SurfaceViewRenderer) findViewById(R.id.surface_view2);
@@ -416,10 +459,7 @@ public class VideoActivity extends AppCompatActivity implements HMSEventListener
                 localMediaStream = mediaStream;
                 if(localSurfaceViewRenderer ==null)
                 {
-                    localSurfaceViewRenderer.init(HMSWebRTCEglUtils.getRootEglBaseContext(), null);
-                    localSurfaceViewRenderer.setScalingType(RendererCommon.ScalingType.SCALE_ASPECT_FILL);
-                    localSurfaceViewRenderer.setEnableHardwareScaler(true);
-                    localSurfaceViewRenderer.setMirror(true);
+                    initializeSurfaceViews();
                 }
                 if(mediaStream.getStream().videoTracks.size()>0) {
                     localVideoTrack = mediaStream.getStream().videoTracks.get(0);
@@ -480,15 +520,40 @@ public class VideoActivity extends AppCompatActivity implements HMSEventListener
         hmsClient.disconnect();
     }
 
-    @Override
-    protected void onPause() {
-        getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-        super.onPause();
+    public void handleReconnect()
+    {
+        Log.v(TAG, "handleReconnect");
+        //Create a 100ms peer
+        peer = new HMSPeer(username, authToken);
+
+        if(peer.getRoomId()==null)
+
+            //Create a room
+            hmsRoom = new HMSRoom(roomname);
+
+        //For debugging purpose. Remove it later
+        if (env.equals("conf"))
+            peer.setRoomId(hmsRoom.getRoomId());
+
+        //Create client configuration
+        config = new HMSClientConfig(servername);
+
+        //Create a 100ms client
+        hmsClient = new HMSClient(this, getApplicationContext(), peer, config);
+
+        hmsClient.setLogLevel(HMSLogger.LogLevel.LOG_DEBUG);
+
+        hmsClient.connect();
     }
+
+
 
     public void disconnect()
     {
-        HMSStream.stopCapturers();
+        try {
+            HMSStream.stopCapturers();
+        }
+        catch(Exception e){e.printStackTrace();}
         localVideoTrack = null;
         localAudioTrack = null;
         localMediaStream = null;
@@ -565,8 +630,9 @@ public class VideoActivity extends AppCompatActivity implements HMSEventListener
                     if (remoteSurfaceViewRenderers[position - 1] == null) {
                         remoteSurfaceViewRenderers[position - 1].init(HMSWebRTCEglUtils.getRootEglBaseContext(), null);
                         remoteSurfaceViewRenderers[position - 1].setScalingType(RendererCommon.ScalingType.SCALE_ASPECT_FILL);
-                        remoteSurfaceViewRenderers[position - 1].setEnableHardwareScaler(true);
+                        //remoteSurfaceViewRenderers[position - 1].setEnableHardwareScaler(true);
                     }
+                    remoteSurfaceViewRenderers[position - 1].setVisibility(View.VISIBLE);
                     remoteVideoTracks[position-1].addSink(remoteSurfaceViewRenderers[position - 1]);
                 }
 
@@ -578,6 +644,8 @@ public class VideoActivity extends AppCompatActivity implements HMSEventListener
 
     @Override
     public void onConnect() {
+        shouldReconnect = false;
+        Log.v(TAG, "Connect success");
         Log.v(TAG, "You should be able to see local camera feed once the network connection is established and the user is able to join the room");
 
         if(!isJoined)
@@ -603,27 +671,34 @@ public class VideoActivity extends AppCompatActivity implements HMSEventListener
     public void onDisconnect(String errorMessage) {
         Log.v(TAG, "ondisconnected: "+ errorMessage);
 
-        //Clean up the local streams
-        localVideoTrack = null;
-        localAudioTrack = null;
-        localMediaStream = null;
-
-        if(localSurfaceViewRenderer!=null) {
-            localSurfaceViewRenderer.release();
-            localSurfaceViewRenderer.clearImage();
-        }
-        localSurfaceViewRenderer = null;
-
-
-        for(int i=0; i<TOTAL_REMOTE_PEERS; i++){
-            if(remoteSurfaceViewRenderers[i]!=null){
-                remoteSurfaceViewRenderers[i].release();
-                remoteSurfaceViewRenderers[i].clearImage();
+        shouldReconnect = true;
+        isJoined = false;
+        isPublished = false;
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                if(localSurfaceViewRenderer!=null) {
+                    localSurfaceViewRenderer.setVisibility(View.INVISIBLE);
+                    localSurfaceViewRenderer.release();
+                    localSurfaceViewRenderer.clearImage();
+                }
+                localSurfaceViewRenderer = null;
             }
-            remoteSurfaceViewRenderers[i] = null;
-        }
+        });
 
-        //add your retry connection logic here.
+        clearPeerViews();
+
+
+        //Clean up the local streams
+        if(localVideoTrack!=null)
+            localVideoTrack.dispose();
+
+        if(localAudioTrack!=null)
+            localAudioTrack.dispose();
+
+        if(localMediaStream!=null)
+            localMediaStream = null;
+
     }
 
 
@@ -762,6 +837,48 @@ public class VideoActivity extends AppCompatActivity implements HMSEventListener
                         remoteSurfaceViewRenderers[cell-1].clearAnimation();
                     }
                 }
+            }
+        }
+        catch (Exception e){e.printStackTrace();}
+    }
+
+
+    void clearPeerViews()
+    {
+        try {
+            for (cell = 0; cell <= 5; cell++) {
+                    userIdHolder[cell] = null;
+                    isCellFreeHolder[cell] = true;
+
+                    if(cell == 0)
+                    {
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                if(localSurfaceViewRenderer!=null) {
+                                    localSurfaceViewRenderer.setVisibility(View.INVISIBLE);
+                                    localSurfaceViewRenderer.release();
+                                    localSurfaceViewRenderer.clearImage();
+                                }
+                                localSurfaceViewRenderer = null;
+                            }
+                        });
+                    }else {
+
+
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                if (remoteSurfaceViewRenderers[cell - 1] != null)
+                                    remoteSurfaceViewRenderers[cell - 1].setVisibility(View.INVISIBLE);
+                            }
+                        });
+                        if (remoteSurfaceViewRenderers[cell - 1] != null) {
+                            remoteSurfaceViewRenderers[cell - 1].clearImage();
+                            remoteSurfaceViewRenderers[cell - 1].clearAnimation();
+                        }
+                    }
+
             }
         }
         catch (Exception e){e.printStackTrace();}
