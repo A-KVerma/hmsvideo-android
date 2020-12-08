@@ -11,7 +11,7 @@ public class NetworkUtil {
         String status = null;
         ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
-        if (activeNetwork != null) {
+        if (activeNetwork != null && activeNetwork.isConnected() &&activeNetwork.isAvailable()) {
             if (activeNetwork.getType() == ConnectivityManager.TYPE_WIFI) {
                 status = "Wifi enabled";
                 return status;

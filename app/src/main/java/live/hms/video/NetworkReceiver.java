@@ -29,7 +29,8 @@ public class NetworkReceiver extends BroadcastReceiver {
         if(status.isEmpty()||status.equals("No internet is available")||status.equals("No Internet Connection")) {
             status="No Internet Connection";
         }
-        this.networkInterface.onNetworkStatusChange(status);
+        if(this.networkInterface!=null)
+            this.networkInterface.onNetworkStatusChange(status);
         //Toast.makeText(context, status, Toast.LENGTH_LONG).show();
     }
 
