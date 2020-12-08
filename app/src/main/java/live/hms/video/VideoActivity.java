@@ -1,10 +1,13 @@
 package live.hms.video;
 
 import android.Manifest;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.media.AudioManager;
+import android.net.ConnectivityManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
@@ -49,7 +52,7 @@ import org.webrtc.VideoTrack;
 import pub.devrel.easypermissions.AfterPermissionGranted;
 import pub.devrel.easypermissions.EasyPermissions;
 
-public class VideoActivity extends AppCompatActivity implements HMSEventListener {
+public class VideoActivity extends AppCompatActivity implements HMSEventListener, NetworkInterface {
 
     private String TAG = "HMSVideoActivity";
     private HMSPeer peer ;
@@ -103,7 +106,7 @@ public class VideoActivity extends AppCompatActivity implements HMSEventListener
     private String FRONT_FACING_CAMERA = "user";
     private String REAR_FACING_CAMERA = "environment";
 
-
+    private BroadcastReceiver networkReceiver = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -131,10 +134,24 @@ public class VideoActivity extends AppCompatActivity implements HMSEventListener
             env = getIntent().getStringExtra("env");
         }
 
+        //Internet connectivity receiver
+        networkReceiver = new NetworkReceiver(this);
+        broadcastIntent();
+
 
         start();
     }
 
+    public void broadcastIntent() {
+        registerReceiver(networkReceiver, new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
+    }
+
+    @Override
+    protected void onPause() {
+        getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        super.onPause();
+        unregisterReceiver(networkReceiver);
+    }
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
@@ -162,13 +179,17 @@ public class VideoActivity extends AppCompatActivity implements HMSEventListener
         return super.onOptionsItemSelected(item);
     }
 
-
+    @Override
+    public void onNetworkStatusChange(String status) {
+        Log.v(TAG, "Network status: "+status);
+    }
 
     @AfterPermissionGranted(RC_CALL)
     void start()
     {
         String[] perms = {Manifest.permission.CAMERA, Manifest.permission.RECORD_AUDIO};
         if (EasyPermissions.hasPermissions(this, perms)) {
+            initNetworkCheck();
             initPreferences();
             initHMSClient();
             initializeSurfaceViews();
@@ -179,6 +200,17 @@ public class VideoActivity extends AppCompatActivity implements HMSEventListener
         }
 
     }
+
+    private boolean initNetworkCheck()
+    {
+       String networkStatus = NetworkUtil.getConnectivityStatusString(getApplicationContext());
+       Log.v(TAG, networkStatus);
+       if(networkStatus.isEmpty()||networkStatus.equals("No internet is available")||networkStatus.equals("No Internet Connection")) {
+            return false;
+       }
+       return true;
+    }
+
 
     private void initPreferences()
     {
@@ -480,11 +512,7 @@ public class VideoActivity extends AppCompatActivity implements HMSEventListener
         hmsClient.disconnect();
     }
 
-    @Override
-    protected void onPause() {
-        getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-        super.onPause();
-    }
+
 
     public void disconnect()
     {
