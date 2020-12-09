@@ -4,6 +4,7 @@ import android.content.Context;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.widget.Toast;
 
 import androidx.appcompat.app.ActionBar;
@@ -15,6 +16,7 @@ import androidx.preference.PreferenceFragmentCompat;
 import androidx.preference.SwitchPreferenceCompat;
 
 
+import com.instabug.library.InstabugTrackingDelegate;
 
 import org.webrtc.Camera1Enumerator;
 import org.webrtc.Camera2Enumerator;
@@ -49,6 +51,12 @@ public class SettingsActivity extends AppCompatActivity {
         if (actionBar != null) {
             actionBar.setDisplayHomeAsUpEnabled(true);
         }
+    }
+
+    @Override
+    public boolean dispatchTouchEvent(MotionEvent ev){
+        InstabugTrackingDelegate.notifyActivityGotTouchEvent(ev, this);
+        return super.dispatchTouchEvent(ev);
     }
 
 

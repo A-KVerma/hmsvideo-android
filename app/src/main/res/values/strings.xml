@@ -7,9 +7,6 @@
     <string name="missing_permissions_try_again">The application is missing permissions. It might not work correctly. Do you want to try again?</string>
     <string name="yes">Yes</string>
     <string name="no">No</string>
-    <string name="filter_view_conf_env">conf.brytecam.com</string>
-    <string name="filter_view_staging_env">staging.brytecam.com</string>
-    <string name="filter_view_qa_env">qa-in.brytecam.com</string>
     <string name="switch_camera">Switch camera</string>
     <string name="toggle_mic">Toggle mic ON/OFF</string>
 
