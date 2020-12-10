@@ -1,10 +1,9 @@
-package live.hms.video;
+package live.hms.video.network;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
-import android.widget.Toast;
 
 
 public class NetworkReceiver extends BroadcastReceiver {

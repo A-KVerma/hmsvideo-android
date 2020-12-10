@@ -20,7 +20,6 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.ImageButton;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -51,6 +50,9 @@ import org.webrtc.RendererCommon;
 import org.webrtc.SurfaceViewRenderer;
 import org.webrtc.VideoTrack;
 
+import live.hms.video.network.NetworkInterface;
+import live.hms.video.network.NetworkReceiver;
+import live.hms.video.network.NetworkUtil;
 import pub.devrel.easypermissions.AfterPermissionGranted;
 import pub.devrel.easypermissions.EasyPermissions;
 
@@ -157,9 +159,15 @@ public class VideoActivity extends AppCompatActivity implements HMSEventListener
 
     @Override
     protected void onPause() {
-        getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         super.onPause();
-        unregisterReceiver(networkReceiver);
+        getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        try {
+            unregisterReceiver(networkReceiver);
+        }
+        catch(Exception e)
+        {
+            e.printStackTrace();
+        }
     }
 
     @Override
@@ -210,7 +218,6 @@ public class VideoActivity extends AppCompatActivity implements HMSEventListener
             initHMSClient();
             initializeSurfaceViews();
             initToggleMenu();
-
         } else {
             EasyPermissions.requestPermissions(this, "Need User permissions to proceed", RC_CALL, perms);
         }
@@ -531,27 +538,7 @@ public class VideoActivity extends AppCompatActivity implements HMSEventListener
     public void handleReconnect()
     {
         Log.v(TAG, "handleReconnect");
-        //Create a 100ms peer
-        peer = new HMSPeer(username, authToken);
-
-        if(peer.getRoomId()==null)
-
-            //Create a room
-            hmsRoom = new HMSRoom(roomname);
-
-        //For debugging purpose. Remove it later
-        if (env.equals("conf"))
-            peer.setRoomId(hmsRoom.getRoomId());
-
-        //Create client configuration
-        config = new HMSClientConfig(servername);
-
-        //Create a 100ms client
-        hmsClient = new HMSClient(this, getApplicationContext(), peer, config);
-
-        hmsClient.setLogLevel(HMSLogger.LogLevel.LOG_DEBUG);
-
-        hmsClient.connect();
+        initHMSClient();
     }
 
 

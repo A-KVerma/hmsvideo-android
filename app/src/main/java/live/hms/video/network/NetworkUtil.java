@@ -1,4 +1,4 @@
-package live.hms.video;
+package live.hms.video.network;
 
 import android.content.Context;
 import android.net.ConnectivityManager;

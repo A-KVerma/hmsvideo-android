@@ -78,7 +78,7 @@
                     android:host="qa-in.100ms.live" />
             </intent-filter>
         </activity>
-        <receiver android:name = ".NetworkReceiver">
+        <receiver android:name = ".network.NetworkReceiver">
             <intent-filter>
                 <action android:name = "android.net.conn.CONNECTIVITY_CHANGE"
                      />
