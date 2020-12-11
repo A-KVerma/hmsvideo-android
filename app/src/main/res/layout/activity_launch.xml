@@ -22,7 +22,7 @@
         android:layout_height="wrap_content"
         android:ems="10"
         android:inputType="text"
-        android:text="wss://staging.brytecam.com/ws" />
+        android:text="wss://prod-in.100ms.live/ws" />
 
     <TextView
         android:layout_width="match_parent"

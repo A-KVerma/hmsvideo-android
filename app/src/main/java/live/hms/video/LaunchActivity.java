@@ -3,6 +3,7 @@ package live.hms.video;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.StrictMode;
 import android.util.Log;
@@ -60,30 +61,42 @@ public class LaunchActivity extends AppCompatActivity {
             StrictMode.setThreadPolicy(policy);
         }
 
+        Intent appLinkIntent = getIntent();
+
+        String appLinkAction = appLinkIntent.getAction();
+        Uri appLinkData = appLinkIntent.getData();
+
+        if(appLinkData!=null) {
+            Log.v(TAG, "incoming URI: room:" + appLinkData.getQueryParameter("room") + " host: " + appLinkData.getHost());
+            roomIdEditText.setText(appLinkData.getQueryParameter("room"));
+            serverEditText.setText("wss://"+appLinkData.getHost()+"/ws");
+        }
+
+
 
         connectButton = (Button) findViewById(R.id.connect_button);
         connectButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
 
-                if(serverEditText.getText().toString().contains("conf.brytecam"))
-                {
+                if (serverEditText.getText().toString().contains("conf.brytecam")) {
                     Intent callIntent = new Intent(LaunchActivity.this, VideoActivity.class);
                     callIntent.putExtra("server", serverEditText.getText().toString());
                     callIntent.putExtra("room", roomIdEditText.getText().toString());
-                    callIntent.putExtra("user", userIdEditText.getText().toString().length()==0?"JohnDoe":userIdEditText.getText().toString());
+                    callIntent.putExtra("user", userIdEditText.getText().toString().length() == 0 ? "JohnDoe" : userIdEditText.getText().toString());
                     callIntent.putExtra("auth_token", token);
                     callIntent.putExtra("env", "conf");
                     callIntent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
                     startActivity(callIntent);
 
-                }
-                else {
+                } else {
                     //showWorkingDialog();
                     getNewToken();
                 }
             }
         });
+
+
     }
 
     @Override
