@@ -62,11 +62,16 @@ public class LaunchActivity extends AppCompatActivity {
         }
 
         Intent appLinkIntent = getIntent();
-        if(appLinkIntent!=null) {
-            String appLinkAction = appLinkIntent.getAction();
-            Uri appLinkData = appLinkIntent.getData();
-            //Log.v(TAG, "incoming URI: " + appLinkData.getHost() + " " + appLinkData.getQueryParameter("room") + "  " + appLinkAction);
+
+        String appLinkAction = appLinkIntent.getAction();
+        Uri appLinkData = appLinkIntent.getData();
+
+        if(appLinkData!=null) {
+            Log.v(TAG, "incoming URI: room:" + appLinkData.getQueryParameter("room") + " host: " + appLinkData.getHost());
+            roomIdEditText.setText(appLinkData.getQueryParameter("room"));
+            serverEditText.setText("wss://"+appLinkData.getHost()+"/ws");
         }
+
 
 
         connectButton = (Button) findViewById(R.id.connect_button);

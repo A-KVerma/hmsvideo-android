@@ -18,7 +18,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:columnCount="2"
-            android:rowCount="3">
+            android:rowCount="4">
 
             <FrameLayout
                 android:layout_width="0dp"
@@ -147,6 +147,52 @@
                     android:layout_margin="16dp"
                     android:layout_height="wrap_content" />
             </FrameLayout>
+
+
+            <FrameLayout
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_columnWeight="1"
+                android:layout_rowWeight="1">
+
+                <org.webrtc.SurfaceViewRenderer
+                    android:id="@+id/surface_view7"
+                    android:visibility="invisible"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent" />
+
+                <TextView
+                    android:id="@+id/seventhpeer_textview"
+                    android:layout_width="wrap_content"
+                    android:layout_gravity="top|end"
+                    android:textColor="#fff"
+                    android:layout_margin="16dp"
+                    android:layout_height="wrap_content" />
+            </FrameLayout>
+
+
+            <FrameLayout
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_columnWeight="1"
+                android:layout_rowWeight="1">
+
+                <org.webrtc.SurfaceViewRenderer
+                    android:id="@+id/surface_view8"
+                    android:visibility="invisible"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent" />
+
+                <TextView
+                    android:id="@+id/eighthpeer_textview"
+                    android:layout_width="wrap_content"
+                    android:layout_gravity="top|end"
+                    android:textColor="#fff"
+                    android:layout_margin="16dp"
+                    android:layout_height="wrap_content" />
+            </FrameLayout>
+
+
 
 
         </GridLayout>
