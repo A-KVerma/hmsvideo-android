@@ -15,17 +15,10 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
-
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.preference.PreferenceManager;
-
-import com.brytecam.lib.webrtc.HMSStream;
 import com.instabug.library.InstabugTrackingDelegate;
-
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import live.hms.video.R;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -43,7 +36,6 @@ public class LaunchActivity extends AppCompatActivity {
     private String TAG = "HMSMainActivity";
     private Button connectButton;
     private EditText roomIdEditText, userIdEditText, serverEditText;
-    private String token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhY2Nlc3Nfa2V5IjoiNWY5ZWRjNmJkMjM4MjE1YWVjNzcwMGUyIiwiYXBwX2lkIjoiNWY5ZWRjNmJkMjM4MjE1YWVjNzcwMGUxIiwicm9vbV9pZCI6ImFuZHJvaWQiLCJwZWVyX2lkIjoiSm9obkRvZSIsImlhdCI6MTYwNDYzOTY2OSwiZXhwIjoxNjA0NzI2MDY5LCJpc3MiOiI1ZjllZGM2YmQyMzgyMTVhZWM3NzAwZGYiLCJqdGkiOiIyZDQyODgzYi05NjM0LTRjYzEtOTc5ZC04Zjc4MGVjMGZlMmEifQ.DG-aSav45Kt4DONn6617qPuPx9TMwsyvGjx_QPbwS04";
     private String newToken ="";
 
 
@@ -61,38 +53,11 @@ public class LaunchActivity extends AppCompatActivity {
             StrictMode.setThreadPolicy(policy);
         }
 
-        Intent appLinkIntent = getIntent();
-
-        String appLinkAction = appLinkIntent.getAction();
-        Uri appLinkData = appLinkIntent.getData();
-
-        if(appLinkData!=null) {
-            Log.v(TAG, "incoming URI: room:" + appLinkData.getQueryParameter("room") + " host: " + appLinkData.getHost());
-            roomIdEditText.setText(appLinkData.getQueryParameter("room"));
-            serverEditText.setText("wss://"+appLinkData.getHost()+"/ws");
-        }
-
-
-
         connectButton = (Button) findViewById(R.id.connect_button);
         connectButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
-                if (serverEditText.getText().toString().contains("conf.brytecam")) {
-                    Intent callIntent = new Intent(LaunchActivity.this, VideoActivity.class);
-                    callIntent.putExtra("server", serverEditText.getText().toString());
-                    callIntent.putExtra("room", roomIdEditText.getText().toString());
-                    callIntent.putExtra("user", userIdEditText.getText().toString().length() == 0 ? "JohnDoe" : userIdEditText.getText().toString());
-                    callIntent.putExtra("auth_token", token);
-                    callIntent.putExtra("env", "conf");
-                    callIntent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
-                    startActivity(callIntent);
-
-                } else {
-                    //showWorkingDialog();
                     getNewToken();
-                }
             }
         });
 
@@ -108,7 +73,7 @@ public class LaunchActivity extends AppCompatActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.menu_bryte, menu);
+        inflater.inflate(R.menu.menu_hmsvideo, menu);
         return true;
     }
 
@@ -125,6 +90,28 @@ public class LaunchActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    @Override
+    protected void onNewIntent(Intent intent) {
+        Log.v(TAG, "onNewIntent call");
+        setIntent(intent);
+        super.onNewIntent(intent);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        Intent appLinkIntent = getIntent();
+
+        String appLinkAction = appLinkIntent.getAction();
+        Uri appLinkData = appLinkIntent.getData();
+
+        if(appLinkData!=null) {
+            Log.v(TAG, "incoming URI: room:" + appLinkData.getQueryParameter("room") + " host: " + appLinkData.getHost());
+            roomIdEditText.setText(appLinkData.getQueryParameter("room"));
+            serverEditText.setText("wss://"+appLinkData.getHost()+"/ws");
+        }
+    }
 
     void getNewToken()
     {
@@ -151,7 +138,7 @@ public class LaunchActivity extends AppCompatActivity {
         RequestBody body = RequestBody.create(JSON, jsonObject.toString());
 
         Request request = new Request.Builder()
-                .url("https://100ms-services.vercel.app/api/token/")
+                .url(getString(R.string.token_generation_url))
                 .post(body)
                 .build();
 
@@ -175,10 +162,8 @@ public class LaunchActivity extends AppCompatActivity {
             callIntent.putExtra("user", userIdEditText.getText().toString().length() == 0 ? "JohnDoe" : userIdEditText.getText().toString());
             callIntent.putExtra("auth_token", val);
             callIntent.putExtra("env", "others");
-            callIntent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+            //callIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP|Intent.FLAG_ACTIVITY_SINGLE_TOP);
             startActivity(callIntent);
-
-
 
         } catch (Exception e) {
             // removeWorkingDialog();

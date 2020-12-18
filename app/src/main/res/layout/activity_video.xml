@@ -14,6 +14,21 @@
         android:layout_height="match_parent"
         tools:ignore="MergeRootFrame">
 
+        <LinearLayout
+            android:id="@+id/reconnect_progressview"
+            android:visibility="gone"
+            android:layout_width="match_parent"
+            android:layout_height="15dp">
+
+            <TextView  android:layout_width="match_parent"
+                android:text="Reconnecting..."
+                android:background="@android:color/holo_red_dark"
+                android:layout_height="match_parent">
+
+            </TextView>
+
+        </LinearLayout>
+
         <GridLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
@@ -231,6 +246,15 @@
                 android:id="@+id/button_call_toggle_mic"
                 android:background="@android:drawable/ic_btn_speak_now"
                 android:contentDescription="@string/toggle_mic"
+                android:layout_marginEnd="8dp"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:layout_marginRight="8dp" />
+
+            <ImageButton
+                android:id="@+id/button_call_toggle_video"
+                android:background="@android:drawable/ic_media_play"
+                android:contentDescription="@string/toggle_video"
                 android:layout_marginEnd="8dp"
                 android:layout_width="48dp"
                 android:layout_height="48dp"

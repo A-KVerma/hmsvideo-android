@@ -9,7 +9,8 @@ public class HMSApplication extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
-        new Instabug.Builder(this, "83d22f7c2d84a1329e3384b53cffab30")
+        //Instabug SDK for bug reporting
+        new Instabug.Builder(this, getString(R.string.instabug_token))
                 .setInvocationEvents(
                         InstabugInvocationEvent.SHAKE,
                         InstabugInvocationEvent.FLOATING_BUTTON)
