@@ -34,7 +34,7 @@ dependencies {
     implementation 'androidx.preference:preference:1.1.1'
 
     //100ms.live SDK
-    implementation project(':brytecam-sdk-0.9.6')
+    implementation project(':brytecam-sdk-0.9.6.1')
 
     //100ms.live SDK dependencies
     implementation 'org.webrtc:google-webrtc:1.0.32006'
