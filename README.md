@@ -84,7 +84,7 @@ Start the video conversation!
 ## Core building block concepts
 
 
-- **Room** - A room represents a real-time audio, data, video and/or screenshare session, the basic building block of the Brytecam Video SDK
+- **Room** - A room represents a real-time audio, data, video and/or screenshare session, the basic building block of the 100ms Video SDK
 - **Stream** - A stream represents real-time audio, video and data media streams that are shared to a room
 - **Peer/Participant** - A peer represents all participants connected to a room (other than the local participant)
 - **Publish** - A local participant can share its audio, video and data tracks by "publishing" its tracks to the room
