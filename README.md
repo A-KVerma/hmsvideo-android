@@ -72,7 +72,7 @@ In the launch screen, here we need to mention three inputs.
 ```
 And then click `Connect`.
 
-On the first time of launch, user will be prompted with permissions. Then you are good to go to run the application. To verify quickly, connect from a browser on the same end point URL with `https` prefix and join the room. (wss://conf.brytecam.com/ws -> https://conf.brytecam.com)
+On the first time of launch, user will be prompted with permissions. Then you are good to go to run the application. To verify quickly, connect from a browser on the same end point URL with `https` prefix and join the room. (wss://prod-in.100ms.live/ws -> https://prod-in.100ms.live)
 
 Start the video conversation!
 
