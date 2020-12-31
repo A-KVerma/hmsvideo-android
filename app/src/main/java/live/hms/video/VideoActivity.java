@@ -7,7 +7,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
-import android.media.AudioManager;
 import android.net.ConnectivityManager;
 import android.os.Build;
 import android.os.Bundle;
@@ -60,6 +59,13 @@ import java.util.concurrent.Executors;
 import pub.devrel.easypermissions.AfterPermissionGranted;
 import pub.devrel.easypermissions.EasyPermissions;
 
+
+import org.appspot.apprtc.AppRTCAudioManager;
+import org.appspot.apprtc.AppRTCAudioManager.AudioDevice;
+import org.appspot.apprtc.AppRTCAudioManager.AudioManagerEvents;
+import java.util.Set;
+
+
 public class VideoActivity extends AppCompatActivity implements HMSEventListener {
 
     private String TAG = "HMSVideoActivity";
@@ -99,6 +105,7 @@ public class VideoActivity extends AppCompatActivity implements HMSEventListener
     private LinearLayout reconnectProgressView;
     private ExecutorService executor = Executors.newSingleThreadExecutor();
 
+    private AppRTCAudioManager audioManager;
 
     private SurfaceViewRenderer localSurfaceViewRenderer;
     private TextView localPeerTextView;
@@ -150,8 +157,30 @@ public class VideoActivity extends AppCompatActivity implements HMSEventListener
             env = getIntent().getStringExtra("env");
         }
 
+        // Create and audio manager that will take care of audio routing,
+        // audio modes, audio device enumeration etc.
+        audioManager = AppRTCAudioManager.create(getApplicationContext());
+        // Store existing audio settings and change audio mode to
+        // MODE_IN_COMMUNICATION for best possible VoIP performance.
+        Log.d(TAG, "Starting the audio manager...");
+        audioManager.start(new AudioManagerEvents() {
+            // This method will be called each time the number of available audio
+            // devices has changed.
+            @Override
+            public void onAudioDeviceChanged(
+                    AudioDevice audioDevice, Set<AudioDevice> availableAudioDevices) {
+                onAudioManagerDevicesChanged(audioDevice, availableAudioDevices);
+            }
+        });
+
         start();
 
+    }
+
+    private void onAudioManagerDevicesChanged(
+            final AudioDevice device, final Set<AudioDevice> availableDevices) {
+        Log.d(TAG, "onAudioManagerDevicesChanged: " + availableDevices + ", "
+                + "selected: " + device);
     }
 
     @Override
@@ -367,29 +396,18 @@ public class VideoActivity extends AppCompatActivity implements HMSEventListener
 
 
     public void toggleMic() {
-        AudioManager audioManager =(AudioManager)getSystemService(Context.AUDIO_SERVICE);
         if(localAudioTrack!=null)
         {
             if(localAudioTrack.enabled())
             {
                 isAudioEnabled = false;
                 localAudioTrack.setEnabled(false);
-                if(audioManager!=null) {
-                    audioManager.setMode(AudioManager.MODE_IN_CALL);
-                    audioManager.setMode(AudioManager.MODE_NORMAL);
-                }
             }
             else
             {
                 isAudioEnabled = true;
                 localAudioTrack.setEnabled(true);
-                if(audioManager!=null) {
-                    audioManager.setMode(AudioManager.MODE_NORMAL);
-                    audioManager.setMode(AudioManager.MODE_IN_CALL);
-                }
             }
-            if(audioManager!=null)
-                audioManager.setSpeakerphoneOn(isAudioEnabled);
         }
     }
 
