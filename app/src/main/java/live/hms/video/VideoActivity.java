@@ -344,14 +344,7 @@ public class VideoActivity extends AppCompatActivity implements HMSEventListener
 
         hmsClient.setLogLevel(HMSLogger.LogLevel.LOG_DEBUG);
 
-        //On some devices webrtc internal library takes time to load into memory on the first launch.
-        //Adding a delay here to avoid the issue.
-        handler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                hmsClient.connect();
-            }
-        }, 2000);
+        hmsClient.connect();
     }
 
     void initToggleMenu()
