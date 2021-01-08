@@ -16,7 +16,6 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
-import com.instabug.library.InstabugTrackingDelegate;
 import org.json.JSONException;
 import org.json.JSONObject;
 import okhttp3.MediaType;
@@ -66,7 +65,6 @@ public class LaunchActivity extends AppCompatActivity {
 
     @Override
     public boolean dispatchTouchEvent(MotionEvent ev){
-        InstabugTrackingDelegate.notifyActivityGotTouchEvent(ev, this);
         return super.dispatchTouchEvent(ev);
     }
 
@@ -138,7 +136,7 @@ public class LaunchActivity extends AppCompatActivity {
         RequestBody body = RequestBody.create(JSON, jsonObject.toString());
 
         Request request = new Request.Builder()
-                .url(getString(R.string.token_generation_url))
+                .url(REPLACE_ME_WITH_TOKEN_ENDPOINT_URL) // https://100ms.gitbook.io/100ms/client-side/android#2-get-access-keys
                 .post(body)
                 .build();
 

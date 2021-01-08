@@ -41,9 +41,6 @@ dependencies {
     implementation 'com.squareup.okhttp3:okhttp:3.6.0'
     implementation 'com.google.code.gson:gson:2.8.6'
 
-    //Bug reporting SDK.
-    implementation 'com.instabug.library:instabug:10.1.0'
-
     //Library to get user permission
     implementation 'pub.devrel:easypermissions:1.1.3'
 

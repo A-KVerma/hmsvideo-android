@@ -45,7 +45,6 @@ import com.brytecam.lib.webrtc.HMSRTCMediaStream;
 import com.brytecam.lib.webrtc.HMSRTCMediaStreamConstraints;
 import com.brytecam.lib.webrtc.HMSStream;
 import com.brytecam.lib.webrtc.HMSWebRTCEglUtils;
-import com.instabug.library.InstabugTrackingDelegate;
 
 import org.webrtc.AudioTrack;
 import org.webrtc.MediaStream;
@@ -190,7 +189,6 @@ public class VideoActivity extends AppCompatActivity implements HMSEventListener
 
     @Override
     public boolean dispatchTouchEvent(MotionEvent ev){
-        InstabugTrackingDelegate.notifyActivityGotTouchEvent(ev, this);
         return super.dispatchTouchEvent(ev);
     }
 

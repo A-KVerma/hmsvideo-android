@@ -10,8 +10,6 @@
     <string name="switch_camera">Switch camera</string>
     <string name="toggle_mic">Toggle mic ON/OFF</string>
     <string name="toggle_video">Toggle video ON/OFF</string>
-    <string name="instabug_token">83d22f7c2d84a1329e3384b53cffab30</string>
-    <string name="token_generation_url">https://100ms-services.vercel.app/api/token/</string>
 
 
     <!-- Settings -->

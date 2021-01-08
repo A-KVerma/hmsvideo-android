@@ -16,8 +16,6 @@ import androidx.preference.PreferenceFragmentCompat;
 import androidx.preference.SwitchPreferenceCompat;
 
 
-import com.instabug.library.InstabugTrackingDelegate;
-
 import org.webrtc.Camera1Enumerator;
 import org.webrtc.Camera2Enumerator;
 import org.webrtc.CameraEnumerationAndroid;
@@ -55,7 +53,6 @@ public class SettingsActivity extends AppCompatActivity {
 
     @Override
     public boolean dispatchTouchEvent(MotionEvent ev){
-        InstabugTrackingDelegate.notifyActivityGotTouchEvent(ev, this);
         return super.dispatchTouchEvent(ev);
     }
 
