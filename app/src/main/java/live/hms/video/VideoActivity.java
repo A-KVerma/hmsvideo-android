@@ -148,6 +148,8 @@ public class VideoActivity extends AppCompatActivity implements HMSEventListener
                     WindowManager.LayoutParams.FLAG_ALLOW_LOCK_WHILE_SCREEN_ON);
         }
 
+
+
         if(getIntent()!=null)
         {
             servername = getIntent().getStringExtra("server");
@@ -221,7 +223,7 @@ public class VideoActivity extends AppCompatActivity implements HMSEventListener
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.menu_bryte, menu);
+        inflater.inflate(R.menu.menu_hmsvideo, menu);
         return true;
     }
 
@@ -431,11 +433,21 @@ public class VideoActivity extends AppCompatActivity implements HMSEventListener
             {
                 isVideoEnabled = false;
                 localVideoTrack.setEnabled(false);
+                handler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (!isVideoEnabled) {
+                            HMSStream.getCameraCapturer().stop();
+                        }
+                    }
+                }, 500);
+
             }
             else
             {
                 isVideoEnabled = true;
                 localVideoTrack.setEnabled(true);
+                HMSStream.getCameraCapturer().start();
             }
         }
     }
