@@ -124,6 +124,7 @@ public class LaunchActivity extends AppCompatActivity {
         try {
             jsonObject.put("room_id", roomIdEditText.getText().toString());
             jsonObject.put("user_name", userIdEditText.getText().toString());
+            jsonObject.put("role", "Guest");
             jsonObject.put("env", serverEditText.getText().toString().split("\\.")[0].replace("wss://", "") );
         } catch (JSONException e) {
             e.printStackTrace();

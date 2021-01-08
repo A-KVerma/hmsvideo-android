@@ -45,6 +45,7 @@ import com.brytecam.lib.webrtc.HMSRTCMediaStream;
 import com.brytecam.lib.webrtc.HMSRTCMediaStreamConstraints;
 import com.brytecam.lib.webrtc.HMSStream;
 import com.brytecam.lib.webrtc.HMSWebRTCEglUtils;
+import com.google.android.material.snackbar.Snackbar;
 
 import org.webrtc.AudioTrack;
 import org.webrtc.MediaStream;
@@ -87,6 +88,7 @@ public class VideoActivity extends AppCompatActivity implements HMSEventListener
     private VideoTrack[] remoteVideoTracks = new VideoTrack[TOTAL_REMOTE_PEERS];
     private AudioTrack[] remoteAudioTracks = new AudioTrack[TOTAL_REMOTE_PEERS];
     private String[] remoteUserIds = new String[TOTAL_REMOTE_PEERS];
+    private HMSPeer[] remotePeers = new HMSPeer[TOTAL_REMOTE_PEERS];
     private Boolean[] isRemoteCellFree = new Boolean[TOTAL_REMOTE_PEERS];
 
     boolean isCameraToggled = false;
@@ -383,6 +385,26 @@ public class VideoActivity extends AppCompatActivity implements HMSEventListener
             }
         });
 
+    }
+
+    public void tileTapped(View view) {
+        int tileIndex = Integer.parseInt(view.getTag().toString());
+
+        HMSPeer selectedPeer;
+
+        if (tileIndex == -1) {
+            selectedPeer = peer;
+        } else {
+            selectedPeer = remotePeers[tileIndex];
+        }
+
+        if (selectedPeer == null) {
+            return;
+        }
+
+        Snackbar.make(findViewById(R.id.videoCoordinatorLayout),"User role: " + selectedPeer.getRole() + " customer id: " + selectedPeer.getCustomerUserId(),
+                Snackbar.LENGTH_SHORT)
+                .show();
     }
 
 
@@ -754,7 +776,7 @@ public class VideoActivity extends AppCompatActivity implements HMSEventListener
 
     @Override
     public void onPeerJoin(HMSPeer hmsPeer) {
-        Log.v(TAG, "App peer join event"+hmsPeer.getUid());
+        Log.v(TAG, "App peer join event "+hmsPeer.getUid()+" role: " + hmsPeer.getRole() + " user_id: " + hmsPeer.getCustomerUserId());
     }
 
     @Override
@@ -768,7 +790,7 @@ public class VideoActivity extends AppCompatActivity implements HMSEventListener
 
     @Override
     public void onStreamAdd(HMSPeer hmsPeer, HMSStreamInfo hmsStreamInfo) {
-        Log.v(TAG, "App stream add  event"+hmsPeer.getUid());
+        Log.v(TAG, "App stream add  event"+hmsPeer.getUid()+" role: " + hmsPeer.getRole() + " user_id: " + hmsPeer.getCustomerUserId());
         //Handling all the on stream add events inside a single thread to avoid race condition during rendering
         Runnable subscribeRunnable = new Runnable() {
             @Override
@@ -784,6 +806,7 @@ public class VideoActivity extends AppCompatActivity implements HMSEventListener
                         else {
                             remoteUserIds[pos] = hmsStreamInfo.getUid();
                             isRemoteCellFree[pos] = false;
+                            remotePeers[pos] = hmsPeer;
 
                             Log.v(TAG, "On subscribe success");
                             Log.v(TAG, "position: " + pos);
@@ -817,6 +840,7 @@ public class VideoActivity extends AppCompatActivity implements HMSEventListener
             if (remoteUserIds[i]!=null && remoteUserIds[i].equalsIgnoreCase(hmsStreamInfo.getUid())) {
                 isRemoteCellFree[i] = true;
                 remoteUserIds[i] = null;
+                remotePeers[i] = null;
                 int temp = i;
                 Log.v(TAG,  "onstream inside remove: "+cell+"   "+remoteUserIds[i]+"   "+hmsStreamInfo.getUid() );
                 runOnUiThread(new Runnable() {
@@ -899,6 +923,7 @@ public class VideoActivity extends AppCompatActivity implements HMSEventListener
                                 remoteSurfaceViewRenderers[cell].setVisibility(View.INVISIBLE);
                             }
                             remoteUserIds[cell] = null;
+                            remotePeers[cell] = null;
                             isRemoteCellFree[cell] = true;
                             if (remoteSurfaceViewRenderers[cell] != null){
                                 remoteSurfaceViewRenderers[cell].release();

@@ -3,13 +3,14 @@
 
 <androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/videoCoordinatorLayout"
     android:keepScreenOn="true"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     >
 
     <FrameLayout
-        xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         tools:ignore="MergeRootFrame">
@@ -41,6 +42,15 @@
                 android:layout_columnWeight="1"
                 android:layout_rowWeight="1">
 
+                <Button
+                    android:id="@+id/button1"
+                    style="@style/Widget.AppCompat.Button.Borderless"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:onClick="tileTapped"
+                    android:tag="-1"
+                    android:text="" />
+
                 <org.webrtc.SurfaceViewRenderer
                     android:id="@+id/surface_view1"
 
@@ -64,6 +74,15 @@
                 android:layout_columnWeight="1"
                 android:layout_rowWeight="1">
 
+                <Button
+                    android:id="@+id/button2"
+                    style="@style/Widget.AppCompat.Button.Borderless"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:onClick="tileTapped"
+                    android:tag="0"
+                    android:text="" />
+
                 <org.webrtc.SurfaceViewRenderer
                     android:id="@+id/surface_view2"
                     android:visibility="invisible"
@@ -84,6 +103,15 @@
                 android:layout_height="0dp"
                 android:layout_columnWeight="1"
                 android:layout_rowWeight="1">
+
+                <Button
+                    android:id="@+id/button3"
+                    style="@style/Widget.AppCompat.Button.Borderless"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:onClick="tileTapped"
+                    android:tag="1"
+                    android:text="" />
 
                 <org.webrtc.SurfaceViewRenderer
                     android:id="@+id/surface_view3"
@@ -106,6 +134,15 @@
                 android:layout_columnWeight="1"
                 android:layout_rowWeight="1">
 
+                <Button
+                    android:id="@+id/button4"
+                    style="@style/Widget.AppCompat.Button.Borderless"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:onClick="tileTapped"
+                    android:tag="2"
+                    android:text="" />
+
                 <org.webrtc.SurfaceViewRenderer
                     android:id="@+id/surface_view4"
                     android:visibility="invisible"
@@ -127,6 +164,15 @@
                 android:layout_columnWeight="1"
                 android:layout_rowWeight="1">
 
+                <Button
+                    android:id="@+id/button5"
+                    style="@style/Widget.AppCompat.Button.Borderless"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:onClick="tileTapped"
+                    android:tag="3"
+                    android:text="" />
+
                 <org.webrtc.SurfaceViewRenderer
                     android:id="@+id/surface_view5"
                     android:visibility="invisible"
@@ -147,6 +193,15 @@
                 android:layout_height="0dp"
                 android:layout_columnWeight="1"
                 android:layout_rowWeight="1">
+
+                <Button
+                    android:id="@+id/button6"
+                    style="@style/Widget.AppCompat.Button.Borderless"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:onClick="tileTapped"
+                    android:tag="4"
+                    android:text="" />
 
                 <org.webrtc.SurfaceViewRenderer
                     android:id="@+id/surface_view6"
@@ -170,6 +225,15 @@
                 android:layout_columnWeight="1"
                 android:layout_rowWeight="1">
 
+                <Button
+                    android:id="@+id/button7"
+                    style="@style/Widget.AppCompat.Button.Borderless"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:onClick="tileTapped"
+                    android:tag="5"
+                    android:text="" />
+
                 <org.webrtc.SurfaceViewRenderer
                     android:id="@+id/surface_view7"
                     android:visibility="invisible"
@@ -191,6 +255,15 @@
                 android:layout_height="0dp"
                 android:layout_columnWeight="1"
                 android:layout_rowWeight="1">
+
+                <Button
+                    android:id="@+id/button8"
+                    style="@style/Widget.AppCompat.Button.Borderless"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:onClick="tileTapped"
+                    android:tag="6"
+                    android:text="" />
 
                 <org.webrtc.SurfaceViewRenderer
                     android:id="@+id/surface_view8"
