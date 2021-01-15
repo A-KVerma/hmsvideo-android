@@ -137,7 +137,7 @@ public class LaunchActivity extends AppCompatActivity {
         RequestBody body = RequestBody.create(JSON, jsonObject.toString());
 
         Request request = new Request.Builder()
-                .url(REPLACE_ME_WITH_TOKEN_ENDPOINT_URL) // https://100ms.gitbook.io/100ms/client-side/android#2-get-access-keys
+                .url(REPLACE_ME_WITH_TOKEN_ENDPOINT_URL) // https://100ms.gitbook.io/100ms/helpers/runkit
                 .post(body)
                 .build();
 
