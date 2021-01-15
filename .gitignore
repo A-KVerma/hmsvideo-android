@@ -17,6 +17,8 @@
 *.ap_
 *.aab
 
+app/gradle.properties
+
 # Files for the ART/Dalvik VM
 *.dex
 
