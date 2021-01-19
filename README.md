@@ -64,6 +64,6 @@ Follow the create-room guide in [100ms GitBook](https://100ms.gitbook.io/100ms/s
 
 ![app](img/app.png?raw=true "app")
 
-# SDK Documentation
+# 100ms SDK Documentation
 
 Refer the [Getting Started - Android](https://100ms.gitbook.io/100ms/client-side/android) guide in 100ms Gitbook.
