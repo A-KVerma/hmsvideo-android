@@ -54,7 +54,7 @@ NOTE: Use the exact Room Id as obtained from the [`create-room` API](https://100
 
 And then click `Connect`.
 
-On the first time of launch, user will be prompted with permissions. Then you are good to go to run the application. To verify quickly, connect from a browser on the same end point URL with `https` prefix and join the room. (wss://prod-in.100ms.live/ws -> https://prod-in.100ms.live)
+On the first time of launch, user will be prompted with permissions. Then you are good to go to run the application. 
 
 Start the video conversation!
 
