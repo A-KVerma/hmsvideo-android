@@ -745,9 +745,14 @@ public class VideoActivity extends AppCompatActivity implements HMSEventListener
     }
 
     @Override
+    protected void onStop() {
+        super.onStop();
+        shouldReconnect = false;
+    }
+
+    @Override
     public void onDisconnect(String errorMessage) {
         Log.v(TAG, "ondisconnected: "+ errorMessage);
-        shouldReconnect = true;
         isJoined = false;
         isPublished = false;
         //Clearing all the views

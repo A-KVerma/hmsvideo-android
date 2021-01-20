@@ -4,6 +4,7 @@ import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.StrictMode;
 import android.util.Log;
@@ -16,6 +17,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 import okhttp3.MediaType;
@@ -137,7 +139,7 @@ public class LaunchActivity extends AppCompatActivity {
         RequestBody body = RequestBody.create(JSON, jsonObject.toString());
 
         Request request = new Request.Builder()
-                .url(REPLACE_ME_WITH_TOKEN_ENDPOINT_URL) // https://100ms.gitbook.io/100ms/helpers/runkit
+                .url(BuildConfig.TOKEN_ENDPOINT)
                 .post(body)
                 .build();
 
