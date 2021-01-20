@@ -18,7 +18,7 @@ The Android SDK supports Android API level 21 and higher. It is built for armeab
 - Clone this repository
 
   ```bash
-  git clone https://github.com/100mslive/hmsvideo-android.git
+  git clone --depth 1 https://github.com/100mslive/hmsvideo-android.git
   ```
 
 - Host your token generation service [following this guide](https://100ms.gitbook.io/100ms/helpers/runkit)
@@ -28,7 +28,10 @@ The Android SDK supports Android API level 21 and higher. It is built for armeab
   cp app/gradle.properties.example app/gradle.properties
   ```
 
-- Put your endpoint URL as `TOKEN_ENDPOINT` in `app/gradle.properties`
+- Put your endpoint URL as `TOKEN_ENDPOINT` in `app/gradle.properties`. Make sure it has the `/?api=token` suffix. For example:
+  ```env
+  TOKEN_ENDPOINT="https://example-tokenservice.runkit.sh/?api=token"
+  ```
 
 # Run the application
 
